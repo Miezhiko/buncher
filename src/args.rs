@@ -31,8 +31,11 @@ impl FromStr for Operation {
 #[derive(Parser, Debug)]
 #[clap(version, about, long_about = None)]
 pub struct Args {
-  #[clap(short, long, required=true, forbid_empty_values=true, help="Target directory")]
+  #[clap(short, long, required=true, forbid_empty_values=true, help="Source directory")]
   pub directory: String,
+
+  #[clap(short, long, required=false, forbid_empty_values=true, help="Output directory")]
+  pub target: Option<String>,
 
   #[clap(short, long, min_values=1, required=true, forbid_empty_values=true, help="Operations")]
   pub operations: Vec<Operation>

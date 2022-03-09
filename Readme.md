@@ -7,14 +7,17 @@ images directory bunch processing app
 
 ```
 buncher 0.0.1
+
 USAGE:
-    buncher --directory <DIRECTORY> --operations <OPERATIONS>...
+    buncher [OPTIONS] --directory <DIRECTORY> --operations <OPERATIONS>...
 
 OPTIONS:
-    -d, --directory <DIRECTORY>         Target directory
+    -d, --directory <DIRECTORY>         Source directory
     -h, --help                          Print help information
     -o, --operations <OPERATIONS>...    Operations
+    -t, --target <TARGET>               Output directory
     -V, --version                       Print version information
+
 ```
 
 Supported operations list:

@@ -7,12 +7,22 @@ use std::{
   path::Path
 };
 
-pub fn process_file(f: &Path, ops: &[Operation]) -> anyhow::Result<()> {
+pub fn process_file( f: &Path
+                   , ops: &[Operation]
+                   , target_dir: &Option<&str>
+                   ) -> anyhow::Result<()> {
   let mut img = image::open(f)?;
-  let fname = f.file_stem().unwrap()
-                           .to_str()
-                           .unwrap_or_else(|| f.to_str().unwrap());
-  let mut output = File::create(&format!("{fname}-bunched.jpg"))?;
+  let mut output = if let Some(target) = target_dir {
+    let fname = f.file_name().unwrap()
+                             .to_str()
+                             .unwrap_or_else(|| f.to_str().unwrap());
+    File::create(&format!("{target}/{fname}.jpg"))?
+  } else {
+    let fname = f.file_stem().unwrap()
+                             .to_str()
+                             .unwrap_or_else(|| f.to_str().unwrap());
+    File::create(&format!("{fname}-bunched.jpg"))?
+  };
   for op in ops {
     img = match op {
       Operation::Resize => {
