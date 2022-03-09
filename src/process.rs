@@ -45,6 +45,13 @@ pub fn process_file( f: &Path
   if let Some(thumbnail) = &args.thumbnail {
     img = img.thumbnail(thumbnail.width, thumbnail.height);
   }
+  if let Some(rotate) = &args.rotate {
+    img = match rotate {
+      Rotate::Rotate90  => img.rotate90(),
+      Rotate::Rotate180 => img.rotate180(),
+      Rotate::Rotate270 => img.rotate270(),
+    }
+  }
   img.write_to(&mut output, ImageFormat::Jpeg)?;
   Ok(())
 }
