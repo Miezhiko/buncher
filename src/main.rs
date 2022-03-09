@@ -34,11 +34,18 @@ fn main() -> anyhow::Result<()> {
   let mut seen_hashes = HashMap::new();
 
   args.additional.dedup();
+
   if args.flip && args.additional.contains(&Operation::Flip) {
     args.additional.push(Operation::Flip);
   }
   if args.mirror && args.additional.contains(&Operation::Mirror) {
     args.additional.push(Operation::Mirror);
+  }
+  if args.grayscale && args.additional.contains(&Operation::Grayscale) {
+    args.additional.push(Operation::Grayscale);
+  }
+  if args.invert && args.additional.contains(&Operation::Invert) {
+    args.additional.push(Operation::Invert);
   }
 
   for f in glob(&format!("{path}/*.jpg"))?

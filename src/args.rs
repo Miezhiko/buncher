@@ -6,13 +6,15 @@ use std::str::FromStr;
 pub enum Operation {
   Flip,
   Mirror,
+  Invert,
+  Grayscale
 }
 
 #[derive(Parser, Debug)]
 pub enum Rotate {
   Rotate90,
   Rotate180,
-  Rotate270,
+  Rotate270
 }
 
 #[derive(Parser, Debug)]
@@ -53,9 +55,11 @@ impl FromStr for Operation {
 
   fn from_str(s: &str) -> anyhow::Result<Self> {
     match s {
-      "f"   => Ok(Operation::Flip),
-      "m"   => Ok(Operation::Mirror),
-      _   => Err(anyhow::anyhow!("Unknown operation"))
+      "flip"      => Ok(Operation::Flip),
+      "mirror"    => Ok(Operation::Mirror),
+      "invert"    => Ok(Operation::Invert),
+      "grayscale" => Ok(Operation::Grayscale),
+      _           => Err(anyhow::anyhow!("Unknown operation"))
     }
   }
 }
@@ -81,8 +85,17 @@ pub struct Args {
   #[clap(long, help="Mirror images")]
   pub mirror: bool,
 
+  #[clap(long, help="Invert images")]
+  pub invert: bool,
+
+  #[clap(long, help="Grayscale images")]
+  pub grayscale: bool,
+
   #[clap(long, forbid_empty_values=true, help="Blur images")]
   pub blur: Option<f32>,
+
+  #[clap(long, forbid_empty_values=true, help="Brighten images")]
+  pub brighten: Option<i32>,
 
   #[clap(long, forbid_empty_values=true, help="Rotate images")]
   pub rotate: Option<Rotate>,

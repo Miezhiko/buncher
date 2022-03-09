@@ -27,17 +27,18 @@ pub fn process_file( f: &Path
     File::create(&format!("{fname}-bunched.jpg"))?
   };
   for op in &args.additional {
-    img = match op {
-      Operation::Flip => {
-        img.flipv()
-      },
-      Operation::Mirror => {
-        img.fliph()
-      },
+    match op {
+      Operation::Flip       => img = img.flipv(),
+      Operation::Mirror     => img = img.fliph(),
+      Operation::Invert     => img.invert(),
+      Operation::Grayscale  => img = img.grayscale(),
     };
   }
   if let Some(blur) = args.blur {
     img = img.blur(blur);
+  }
+  if let Some(brighten) = args.brighten {
+    img = img.brighten(brighten);
   }
   if let Some(resize) = &args.resize {
     img = img.resize(resize.width, resize.height, FilterType::Nearest);
@@ -49,7 +50,7 @@ pub fn process_file( f: &Path
     img = match rotate {
       Rotate::Rotate90  => img.rotate90(),
       Rotate::Rotate180 => img.rotate180(),
-      Rotate::Rotate270 => img.rotate270(),
+      Rotate::Rotate270 => img.rotate270()
     }
   }
   img.write_to(&mut output, ImageFormat::Jpeg)?;
