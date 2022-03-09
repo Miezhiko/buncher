@@ -21,7 +21,7 @@ fn main() -> anyhow::Result<()> {
     match f {
       Ok(file_path) => {
         println!("processing: {}", file_path.display());
-        process_file(&file_path, &args.operation)?;
+        process_file(&file_path, &args.operations)?;
       }
       Err(e) => {
         eprintln!("ERROR: {}", e);

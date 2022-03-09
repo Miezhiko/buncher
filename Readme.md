@@ -1,4 +1,4 @@
-bunch images processing app
-===========================
+images directory bunch processing app
+=====================================
 
 **WIP**

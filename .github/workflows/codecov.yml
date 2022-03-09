@@ -1,0 +1,30 @@
+on:
+  push:
+    branches: [ mawa ]
+
+name: codecov
+
+jobs:
+  check:
+    name: Rust project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+          components: rustfmt
+
+      - name: Run cargo-tarpaulin
+        continue-on-error: true
+        uses: actions-rs/tarpaulin@v0.1
+
+      - name: Upload to codecov.io
+        uses: codecov/codecov-action@v1.0.2
+        continue-on-error: true
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}

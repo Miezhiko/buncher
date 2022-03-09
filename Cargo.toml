@@ -10,5 +10,5 @@ readme          = "Readme.md"
 [dependencies]
 image = { version = "0.24", features = [ "png", "jpeg", "tiff" ] }
 anyhow = "1"
-clap = { version = "3.1", features = ["derive"] }
+clap = { version = "3.1", features = ["derive", "color"] }
 glob = "0.3"
