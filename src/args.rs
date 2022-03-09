@@ -37,6 +37,9 @@ pub struct Args {
   #[clap(short, long, required=false, forbid_empty_values=true, help="Output directory")]
   pub target: Option<String>,
 
+  #[clap(short, long, help="Remove duplicates")]
+  pub clean: bool,
+
   #[clap(short, long, min_values=1, required=true, forbid_empty_values=true, help="Operations")]
   pub operations: Vec<Operation>
 }

@@ -9,7 +9,15 @@ use process::process_file;
 use clap::Parser;
 use glob::glob;
 
-use std::time::Instant;
+use std::{
+  time::Instant,
+  collections::{
+    hash_map::Entry,
+    HashMap
+  }, fs, io
+};
+
+use sha3::{Digest, Sha3_256};
 
 fn main() -> anyhow::Result<()> {
   let args = Args::parse();
@@ -23,12 +31,30 @@ fn main() -> anyhow::Result<()> {
     None
   };
 
+  let mut seen_hashes = HashMap::new();
+
   for f in glob(&format!("{path}/*.jpg"))?
     .chain(glob(&format!("{path}/*.png"))?)
     .chain(glob(&format!("{path}/*.tiff"))?) {
     match f {
       Ok(file_path) => {
         println!("processing: {}", file_path.display());
+        if args.clean {
+          let mut file = fs::File::options().read(true).open(&file_path)?;
+          let mut hasher = Sha3_256::new();
+          io::copy(&mut file, &mut hasher)?;
+          let hash = hasher.finalize();
+          match seen_hashes.entry(hash) {
+            Entry::Vacant(map) => {
+              map.insert(file_path.clone());
+            },
+            Entry::Occupied(_map) => {
+              println!("removing as duplication");
+              fs::remove_file(&file_path)?;
+              continue;
+            }
+          }
+        }
         process_file(&file_path, &args.operations, &target_directory)?;
       }
       Err(e) => {
