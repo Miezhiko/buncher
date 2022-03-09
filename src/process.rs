@@ -1,6 +1,9 @@
-use crate::args::Operation;
+use crate::args::*;
 
-use image::ImageFormat;
+use image::{
+  ImageFormat,
+  imageops::FilterType
+};
 
 use std::{
   fs::File,
@@ -8,7 +11,7 @@ use std::{
 };
 
 pub fn process_file( f: &Path
-                   , ops: &[Operation]
+                   , args: &Args
                    , target_dir: &Option<&str>
                    ) -> anyhow::Result<()> {
   let mut img = image::open(f)?;
@@ -23,27 +26,24 @@ pub fn process_file( f: &Path
                              .unwrap_or_else(|| f.to_str().unwrap());
     File::create(&format!("{fname}-bunched.jpg"))?
   };
-  for op in ops {
+  for op in &args.additional {
     img = match op {
-      Operation::Resize => {
-        img.thumbnail(500, 500)
-      },
       Operation::Flip => {
         img.flipv()
       },
       Operation::Mirror => {
         img.fliph()
       },
-      Operation::Rotate90 => {
-        img.rotate90()
-      },
-      Operation::Rotate180 => {
-        img.rotate180()
-      },
-      Operation::Blur => {
-        img.blur(0.2)
-      },
     };
+  }
+  if let Some(blur) = args.blur {
+    img = img.blur(blur);
+  }
+  if let Some(resize) = &args.resize {
+    img = img.resize(resize.width, resize.height, FilterType::Nearest);
+  }
+  if let Some(thumbnail) = &args.thumbnail {
+    img = img.thumbnail(thumbnail.width, thumbnail.height);
   }
   img.write_to(&mut output, ImageFormat::Jpeg)?;
   Ok(())

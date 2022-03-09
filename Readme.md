@@ -3,24 +3,32 @@ images directory bunch processing app
 
 [![mawa](https://github.com/Miezhiko/buncher/actions/workflows/mawa.yml/badge.svg)](https://github.com/Miezhiko/buncher/actions/workflows/mawa.yml)
 
-**WIP**
-
 ```
-buncher 0.0.2
+buncher 0.0.3
 
 USAGE:
-    buncher [OPTIONS] --directory <DIRECTORY> --operations <OPERATIONS>...
+    buncher [OPTIONS] --directory <DIRECTORY>
 
 OPTIONS:
-    -c, --clean                         Remove duplicates
-    -d, --directory <DIRECTORY>         Source directory
-    -h, --help                          Print help information
-    -o, --operations <OPERATIONS>...    Operations
-    -t, --target <TARGET>               Output directory
-    -V, --version                       Print version information
+        --additional <ADDITIONAL>    Additional operations
+        --blur <BLUR>                Blur images
+    -c, --clean                      Remove duplicates
+    -d, --directory <DIRECTORY>      Source directory
+        --flip                       Flip images
+    -h, --help                       Print help information
+        --mirror                     Mirror images
+    -o, --output <OUTPUT>            Output directory
+        --resize <RESIZE>            Resize images
+        --rotate <ROTATE>            Rotate images
+        --thumbnail <THUMBNAIL>      Thumbnail images
+    -V, --version                    Print version information
 ```
 
-Supported operations list:
---------------------------
+Supported list of additional operations:
+----------------------------------------
 
-**will do later**
+ - flip
+ - mirror
+ - ...
+
+**this is very early version**

@@ -20,11 +20,11 @@ use std::{
 use sha3::{Digest, Sha3_256};
 
 fn main() -> anyhow::Result<()> {
-  let args = Args::parse();
+  let mut args = Args::parse();
   let timer = Instant::now();
-  let path = args.directory;
+  let path = &args.directory;
 
-  let target_directory = if let Some(target_dir) = &args.target {
+  let target_directory = if let Some(target_dir) = &args.output {
     std::fs::create_dir_all(target_dir)?;
     Some(target_dir.as_str())
   } else {
@@ -32,6 +32,14 @@ fn main() -> anyhow::Result<()> {
   };
 
   let mut seen_hashes = HashMap::new();
+
+  args.additional.dedup();
+  if args.flip && args.additional.contains(&Operation::Flip) {
+    args.additional.push(Operation::Flip);
+  }
+  if args.mirror && args.additional.contains(&Operation::Mirror) {
+    args.additional.push(Operation::Mirror);
+  }
 
   for f in glob(&format!("{path}/*.jpg"))?
     .chain(glob(&format!("{path}/*.png"))?)
@@ -55,7 +63,7 @@ fn main() -> anyhow::Result<()> {
             }
           }
         }
-        process_file(&file_path, &args.operations, &target_directory)?;
+        process_file(&file_path, &args, &target_directory)?;
       }
       Err(e) => {
         eprintln!("ERROR: {}", e);
