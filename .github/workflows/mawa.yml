@@ -1,0 +1,40 @@
+name: mawa
+
+on:
+  push:
+    branches: [ mawa ]
+  pull_request:
+    branches: [ mawa ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: nightly
+        override: true
+        components: clippy, rustfmt
+
+    - name: Build
+      run: cargo build --verbose
+      
+    - name: Test
+      run: cargo test
+
+    - name: Cargo clippy
+      uses: actions-rs/cargo@v1
+      continue-on-error: true
+      with:
+        command: clippy
+        args: -- -D warnings
