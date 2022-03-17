@@ -31,8 +31,8 @@ impl FromStr for Size2D {
                              .split(',')
                              .collect();
 
-    let x_fromstr = coords[0].parse::<u32>()?;
-    let y_fromstr = coords[1].parse::<u32>()?;
+    let x_fromstr = coords[0].trim().parse::<u32>()?;
+    let y_fromstr = coords[1].trim().parse::<u32>()?;
 
     Ok(Size2D { width: x_fromstr, height: y_fromstr })
   }
@@ -105,4 +105,25 @@ pub struct Args {
 
   #[clap(long, forbid_empty_values=true, help="Resize images")]
   pub resize: Option<Size2D>
+}
+
+#[cfg(test)]
+mod args_tests {
+  use super::*;
+  #[test]
+  fn size_parsing() -> anyhow::Result<()> {
+    let size1 = Size2D::from_str("1,5")?;
+    assert_eq!(size1.width, 1);
+    assert_eq!(size1.height, 5);
+
+    let size2 = Size2D::from_str("(2,6)")?;
+    assert_eq!(size2.width, 2);
+    assert_eq!(size2.height, 6);
+
+    let size3 = Size2D::from_str("3, 7")?;
+    assert_eq!(size3.width, 3);
+    assert_eq!(size3.height, 7);
+
+    Ok(())
+  }
 }

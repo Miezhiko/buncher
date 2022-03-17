@@ -31,7 +31,7 @@ pub fn process_file( f: &Path
       Operation::Flip       => img = img.flipv(),
       Operation::Mirror     => img = img.fliph(),
       Operation::Invert     => img.invert(),
-      Operation::Grayscale  => img = img.grayscale(),
+      Operation::Grayscale  => img = img.grayscale()
     };
   }
   if let Some(blur) = args.blur {

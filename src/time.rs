@@ -20,3 +20,14 @@ impl fmt::Display for Elapsed {
     }
   }
 }
+
+#[cfg(test)]
+mod time_tests {
+  use super::*;
+  #[test]
+  fn display_time_test() {
+    let now = Instant::now();
+    let elapsed = Elapsed::from(&now);
+    assert!(!&format!("{elapsed}").is_empty());
+  }
+}
