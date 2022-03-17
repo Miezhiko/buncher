@@ -35,16 +35,16 @@ fn main() -> anyhow::Result<()> {
 
   args.additional.dedup();
 
-  if args.flip && args.additional.contains(&Operation::Flip) {
+  if args.flip && !args.additional.contains(&Operation::Flip) {
     args.additional.push(Operation::Flip);
   }
-  if args.mirror && args.additional.contains(&Operation::Mirror) {
+  if args.mirror && !args.additional.contains(&Operation::Mirror) {
     args.additional.push(Operation::Mirror);
   }
-  if args.grayscale && args.additional.contains(&Operation::Grayscale) {
+  if args.grayscale && !args.additional.contains(&Operation::Grayscale) {
     args.additional.push(Operation::Grayscale);
   }
-  if args.invert && args.additional.contains(&Operation::Invert) {
+  if args.invert && !args.additional.contains(&Operation::Invert) {
     args.additional.push(Operation::Invert);
   }
 
