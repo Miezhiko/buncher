@@ -104,7 +104,10 @@ pub struct Args {
   pub thumbnail: Option<Size2D>,
 
   #[clap(long, forbid_empty_values=true, help="Resize images")]
-  pub resize: Option<Size2D>
+  pub resize: Option<Size2D>,
+
+  #[clap(short, long, required=false, forbid_empty_values=true, help="Ignore image by name mask")]
+  pub ignore: Option<String>
 }
 
 #[cfg(test)]

@@ -1,10 +1,10 @@
-images directory bunch processing app
-=====================================
+images (and maybe videos) directory bunch processing app
+========================================================
 
 [![mawa](https://github.com/Miezhiko/buncher/actions/workflows/mawa.yml/badge.svg)](https://github.com/Miezhiko/buncher/actions/workflows/mawa.yml)
 
 ```
-buncher 0.0.4
+buncher 0.0.7
 
 USAGE:
     buncher [OPTIONS] --directory <DIRECTORY>
@@ -18,6 +18,7 @@ OPTIONS:
         --flip                       Flip images
         --grayscale                  Grayscale images
     -h, --help                       Print help information
+    -i, --ignore <IGNORE>            Ignore image by name mask
         --invert                     Invert images
         --mirror                     Mirror images
     -o, --output <OUTPUT>            Output directory
