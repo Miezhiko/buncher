@@ -9,7 +9,6 @@ use imageio::process_img;
 use videoio::process_vid;
 
 use clap::Parser;
-use glob::glob;
 
 use std::{
   time::Instant,
@@ -31,24 +30,27 @@ fn main() -> anyhow::Result<()> {
   let target_directory = if let Some(target_dir) = &args.output {
     if Path::new(&target_dir).exists() {
       if args.clean {
-        for f in glob(&format!("{target_dir}/*.jpg"))?
-          .chain(glob(&format!("{target_dir}/*.png"))?)
-          .chain(glob(&format!("{target_dir}/*.tiff"))?)
-          .chain(glob(&format!("{target_dir}/*.mp4"))?) {
-          if let Ok(file_path) = f {
-            let mut file = fs::File::options().read(true).open(&file_path)?;
-            let mut hasher = Sha3_256::new();
-            io::copy(&mut file, &mut hasher)?;
-            let hash = hasher.finalize();
-            match seen_hashes.entry(hash) {
-              Entry::Vacant(map) => {
-                map.insert(file_path.clone());
-              },
-              Entry::Occupied(_map) => {
-                println!("removing duplication in target path {}", file_path.as_os_str().to_str().unwrap_or(""));
-                fs::remove_file(&file_path)?;
-                continue;
-              }
+        let walker = globwalk::GlobWalkerBuilder::from_patterns(
+            target_dir, &["*.{jpg, png, tiff, mp4}"]
+          ).max_depth(4)
+           .follow_links(false)
+           .build()?
+           .into_iter()
+           .filter_map(Result::ok);
+        for entry in walker {
+          let file_path = entry.path();
+          let mut file = fs::File::options().read(true).open(&file_path)?;
+          let mut hasher = Sha3_256::new();
+          io::copy(&mut file, &mut hasher)?;
+          let hash = hasher.finalize();
+          match seen_hashes.entry(hash) {
+            Entry::Vacant(map) => {
+              map.insert(file_path.to_path_buf());
+            },
+            Entry::Occupied(_map) => {
+              println!("removing duplication in target path {}", file_path.as_os_str().to_str().unwrap_or(""));
+              fs::remove_file(&file_path)?;
+              continue;
             }
           }
         }
@@ -76,62 +78,62 @@ fn main() -> anyhow::Result<()> {
     args.additional.push(Operation::Invert);
   }
 
-  for f in glob(&format!("{path}/*.jpg"))?
-    .chain(glob(&format!("{path}/*.png"))?)
-    .chain(glob(&format!("{path}/*.tiff"))?) {
-    match f {
-      Ok(file_path) => {
-        println!("processing: {}", file_path.display());
-        if args.clean {
-          let mut file = fs::File::options().read(true).open(&file_path)?;
-          let mut hasher = Sha3_256::new();
-          io::copy(&mut file, &mut hasher)?;
-          let hash = hasher.finalize();
-          match seen_hashes.entry(hash) {
-            Entry::Vacant(map) => {
-              map.insert(file_path.clone());
-            },
-            Entry::Occupied(_map) => {
-              println!("removing as duplication {}", file_path.as_os_str().to_str().unwrap_or(""));
-              fs::remove_file(&file_path)?;
-              continue;
-            }
-          }
+  let walker_images = globwalk::GlobWalkerBuilder::from_patterns(
+      path, &["*.{jpg, png, tiff}"]
+    ).max_depth(4)
+     .follow_links(false)
+     .build()?
+     .into_iter()
+     .filter_map(Result::ok);
+  for entry in walker_images {
+    let file_path = entry.path();
+    println!("processing: {}", file_path.display());
+    if args.clean {
+      let mut file = fs::File::options().read(true).open(&file_path)?;
+      let mut hasher = Sha3_256::new();
+      io::copy(&mut file, &mut hasher)?;
+      let hash = hasher.finalize();
+      match seen_hashes.entry(hash) {
+        Entry::Vacant(map) => {
+          map.insert(file_path.to_path_buf());
+        },
+        Entry::Occupied(_map) => {
+          println!("removing as duplication {}", file_path.as_os_str().to_str().unwrap_or(""));
+          fs::remove_file(&file_path)?;
+          continue;
         }
-        process_img(path, &file_path, &args, &target_directory, &mut seen_hashes)?;
       }
-      Err(e) => {
-        eprintln!("ERROR: {}", e);
-      }
-    };
+    }
+    process_img(path, &file_path, &args, &target_directory, &mut seen_hashes)?;
   }
 
-  for f in glob(&format!("{path}/*.mp4"))? {
-    match f {
-      Ok(file_path) => {
-        println!("processing: {}", file_path.display());
-        if args.clean {
-          let mut file = fs::File::options().read(true).open(&file_path)?;
-          let mut hasher = Sha3_256::new();
-          io::copy(&mut file, &mut hasher)?;
-          let hash = hasher.finalize();
-          match seen_hashes.entry(hash) {
-            Entry::Vacant(map) => {
-              map.insert(file_path.clone());
-            },
-            Entry::Occupied(_map) => {
-              println!("removing as duplication {}", file_path.as_os_str().to_str().unwrap_or(""));
-              fs::remove_file(&file_path)?;
-              continue;
-            }
-          }
+  let walker_videos = globwalk::GlobWalkerBuilder::from_patterns(
+    path, &["*.{mp4}"]
+  ).max_depth(4)
+   .follow_links(false)
+   .build()?
+   .into_iter()
+   .filter_map(Result::ok);
+  for entry in walker_videos {
+    let file_path = entry.path();
+    println!("processing: {}", file_path.display());
+    if args.clean {
+      let mut file = fs::File::options().read(true).open(&file_path)?;
+      let mut hasher = Sha3_256::new();
+      io::copy(&mut file, &mut hasher)?;
+      let hash = hasher.finalize();
+      match seen_hashes.entry(hash) {
+        Entry::Vacant(map) => {
+          map.insert(file_path.to_path_buf());
+        },
+        Entry::Occupied(_map) => {
+          println!("removing as duplication {}", file_path.as_os_str().to_str().unwrap_or(""));
+          fs::remove_file(&file_path)?;
+          continue;
         }
-        process_vid(path, &file_path, &args, &target_directory, &mut seen_hashes)?;
       }
-      Err(e) => {
-        eprintln!("ERROR: {}", e);
-      }
-    };
+    }
+    process_vid(path, &file_path, &args, &target_directory, &mut seen_hashes)?;
   }
 
   println!("Elapsed {}", Elapsed::from(&timer));
