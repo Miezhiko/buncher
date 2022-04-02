@@ -6,9 +6,16 @@ use image::{
 };
 
 use std::{
+  collections::{ HashMap, hash_map::Entry },
   fs::{ File, self },
-  path::Path
+  path::{ Path, PathBuf },
+  io
 };
+
+use generic_array::GenericArray;
+use typenum::{ UInt, UTerm, B1, B0 };
+
+use sha3::{Digest, Sha3_256};
 
 fn get_output_dir( input_dir: &str
                  , f: &Path
@@ -29,6 +36,9 @@ pub fn process_img( input_dir: &str
                   , f: &Path
                   , args: &Args
                   , target_dir: &Option<&str>
+                  , seen_hashes: &mut HashMap< GenericArray< u8
+                                                           , UInt<UInt<UInt<UInt<UInt<UInt<UTerm, B1>, B0>, B0>, B0>, B0>, B0> >
+                                             , PathBuf >
                   ) -> anyhow::Result<()> {
  let fstem = f.file_stem().unwrap()
                           .to_str()
@@ -51,9 +61,10 @@ pub fn process_img( input_dir: &str
     }
   }
   let mut img = image::open(f)?;
+  let mut new_path = String::new();
   let mut output = if let Some(target) = target_dir {
     let directory = get_output_dir(input_dir, f, target)?;
-    let mut new_path = format!("{directory}/{fstem}.jpg");
+    new_path = format!("{directory}/{fstem}.jpg");
     let mut i = 1;
     while Path::new(&new_path).exists() {
       new_path = format!("{directory}/{fstem}-{i}.jpg");
@@ -95,5 +106,20 @@ pub fn process_img( input_dir: &str
     }
   }
   img.write_to(&mut output, ImageFormat::Jpeg)?;
+  if args.clean && !new_path.is_empty() {
+    let mut file = fs::File::options().read(true).open(&new_path)?;
+    let mut hasher = Sha3_256::new();
+    io::copy(&mut file, &mut hasher)?;
+    let hash = hasher.finalize();
+    match seen_hashes.entry(hash) {
+      std::collections::hash_map::Entry::Vacant(map) => {
+        map.insert(Path::new(&new_path).to_path_buf());
+      },
+      Entry::Occupied(_map) => {
+        println!("removing duplication in target path {}", &new_path);
+        fs::remove_file(&new_path)?;
+      }
+    }
+  }
   Ok(())
 }

@@ -98,7 +98,7 @@ fn main() -> anyhow::Result<()> {
             }
           }
         }
-        process_img(path, &file_path, &args, &target_directory)?;
+        process_img(path, &file_path, &args, &target_directory, &mut seen_hashes)?;
       }
       Err(e) => {
         eprintln!("ERROR: {}", e);
@@ -126,7 +126,7 @@ fn main() -> anyhow::Result<()> {
             }
           }
         }
-        process_vid(path, &file_path, &args, &target_directory)?;
+        process_vid(path, &file_path, &args, &target_directory, &mut seen_hashes)?;
       }
       Err(e) => {
         eprintln!("ERROR: {}", e);

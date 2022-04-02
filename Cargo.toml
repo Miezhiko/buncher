@@ -8,8 +8,10 @@ license         = "AGPL-3.0-only"
 readme          = "Readme.md"
 
 [dependencies]
-image   = { version = "0.24", features = [ "png", "jpeg", "tiff" ] }
-anyhow  = "1"
-clap    = { version = "3.1", features = ["derive", "color"] }
-glob    = "0.3"
-sha3    = "0.10"
+image           = { version = "0.24", features = [ "png", "jpeg", "tiff" ] }
+anyhow          = "1"
+clap            = { version = "3.1", features = ["derive", "color"] }
+glob            = "0.3"
+generic-array   = "0.14"
+typenum         = "1.15"
+sha3            = "0.10"
