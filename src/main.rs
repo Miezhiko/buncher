@@ -16,24 +16,50 @@ use std::{
   collections::{
     hash_map::Entry,
     HashMap
-  }, fs, io
+  }, fs, io, path::Path
 };
 
 use sha3::{Digest, Sha3_256};
 
 fn main() -> anyhow::Result<()> {
-  let mut args = Args::parse();
-  let timer = Instant::now();
-  let path = &args.directory;
+  let mut args  = Args::parse();
+  let timer     = Instant::now();
+  let path      = &args.directory;
+
+  let mut seen_hashes = HashMap::new();
 
   let target_directory = if let Some(target_dir) = &args.output {
-    fs::create_dir_all(target_dir)?;
+    if Path::new(&target_dir).exists() {
+      if args.clean {
+        for f in glob(&format!("{target_dir}/*.jpg"))?
+          .chain(glob(&format!("{target_dir}/*.png"))?)
+          .chain(glob(&format!("{target_dir}/*.tiff"))?)
+          .chain(glob(&format!("{target_dir}/*.mp4"))?) {
+          if let Ok(file_path) = f {
+            let mut file = fs::File::options().read(true).open(&file_path)?;
+            let mut hasher = Sha3_256::new();
+            io::copy(&mut file, &mut hasher)?;
+            let hash = hasher.finalize();
+            match seen_hashes.entry(hash) {
+              Entry::Vacant(map) => {
+                map.insert(file_path.clone());
+              },
+              Entry::Occupied(_map) => {
+                println!("removing duplication in target path {}", file_path.as_os_str().to_str().unwrap_or(""));
+                fs::remove_file(&file_path)?;
+                continue;
+              }
+            }
+          }
+        }
+      }
+    } else {
+      fs::create_dir_all(&target_dir)?;
+    }
     Some(target_dir.as_str())
   } else {
     None
   };
-
-  let mut seen_hashes = HashMap::new();
 
   args.additional.dedup();
 
@@ -66,7 +92,7 @@ fn main() -> anyhow::Result<()> {
               map.insert(file_path.clone());
             },
             Entry::Occupied(_map) => {
-              println!("removing as duplication");
+              println!("removing as duplication {}", file_path.as_os_str().to_str().unwrap_or(""));
               fs::remove_file(&file_path)?;
               continue;
             }
@@ -94,7 +120,7 @@ fn main() -> anyhow::Result<()> {
               map.insert(file_path.clone());
             },
             Entry::Occupied(_map) => {
-              println!("removing as duplication");
+              println!("removing as duplication {}", file_path.as_os_str().to_str().unwrap_or(""));
               fs::remove_file(&file_path)?;
               continue;
             }
