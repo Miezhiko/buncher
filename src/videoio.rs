@@ -1,30 +1,29 @@
-use crate::args::*;
+use crate::{
+  types::*,
+  args::*
+};
 
 use std::{
   fs, io,
-  path::{ Path, PathBuf },
-  collections::{ HashMap, hash_map::Entry }
+  path::Path,
+  collections::hash_map::Entry
 };
 
-use generic_array::GenericArray;
-use typenum::{ UInt, UTerm, B1, B0 };
-
+use anyhow::Context;
 use sha3::{Digest, Sha3_256};
 
 pub fn process_vid( input_dir: &str 
                   , f: &Path
                   , args: &Args
                   , target_dir: &Option<&str>
-                  , seen_hashes: &mut HashMap< GenericArray< u8
-                                                           , UInt<UInt<UInt<UInt<UInt<UInt<UTerm, B1>, B0>, B0>, B0>, B0>, B0> >
-                                             , PathBuf >
+                  , seen_hashes: &mut SHA256
                   ) -> anyhow::Result<()> {
   if let Some(target) = target_dir {
-    let fname = f.file_name().unwrap()
+    let fname = f.file_name().context("no fname")?
                              .to_str()
-                             .unwrap_or_else(|| f.to_str().unwrap());
+                             .unwrap_or_else(|| f.to_str().unwrap_or_else(|| "") );
     let directory = f.parent()
-                     .unwrap()
+                     .context("no parent path")?
                      .to_str()
                      .unwrap_or("")
                      .replace(input_dir, target);

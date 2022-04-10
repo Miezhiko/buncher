@@ -1,27 +1,8 @@
-use clap::Parser;
+use crate::types::*;
 
 use std::str::FromStr;
 
-#[derive(Parser, Debug, PartialEq)]
-pub enum Operation {
-  Flip,
-  Mirror,
-  Invert,
-  Grayscale
-}
-
-#[derive(Parser, Debug)]
-pub enum Rotate {
-  Rotate90,
-  Rotate180,
-  Rotate270
-}
-
-#[derive(Parser, Debug)]
-pub struct Size2D {
-  pub width: u32,
-  pub height: u32
-}
+use clap::Parser;
 
 impl FromStr for Size2D {
   type Err = std::num::ParseIntError;

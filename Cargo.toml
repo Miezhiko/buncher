@@ -1,6 +1,6 @@
 [package]
 name            = "buncher"
-version         = "0.0.9"
+version         = "0.1.0"
 edition         = "2021"
 authors         = [ "Miezhiko" ]
 repository      = "https://github.com/Miezhiko/buncher"
@@ -8,7 +8,7 @@ license         = "AGPL-3.0-only"
 readme          = "Readme.md"
 
 [dependencies]
-image           = { version = "0.24", features = [ "png", "jpeg", "tiff" ] }
+image           = { version = "0.24.1", features = [ "png", "jpeg", "tiff" ] }
 anyhow          = "1"
 clap            = { version = "3.1", features = ["derive", "color"] }
 globwalk        = "0.8"

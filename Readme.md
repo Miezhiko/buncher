@@ -3,11 +3,11 @@ images (and maybe videos) directory bunch processing app
 
 [![mawa](https://github.com/Miezhiko/buncher/actions/workflows/mawa.yml/badge.svg)](https://github.com/Miezhiko/buncher/actions/workflows/mawa.yml)
 
-```
-buncher 0.0.7
+```bash
+buncher 0.1.0
 
 USAGE:
-    buncher [OPTIONS] --directory <DIRECTORY>
+    buncher.exe [OPTIONS] --directory <DIRECTORY>
 
 OPTIONS:
         --additional <ADDITIONAL>    Additional operations
@@ -27,6 +27,16 @@ OPTIONS:
         --thumbnail <THUMBNAIL>      Thumbnail images
     -V, --version                    Print version information
 ```
+
+for example:
+
+```bash
+cargo run --release -- --directory input --output output --grayscale --clean --ignore my
+```
+
+`RESIZE` example is `(64,64)`
+
+possible `ROTATE` variants are `90`, `180`, `270`
 
 Supported list of additional operations:
 ----------------------------------------

@@ -1,19 +1,20 @@
-use crate::args::*;
+use crate::{
+  types::*,
+  args::*
+};
 
+use anyhow::Context;
 use image::{
   ImageFormat,
   imageops::FilterType
 };
 
 use std::{
-  collections::{ HashMap, hash_map::Entry },
+  collections::hash_map::Entry,
   fs::{ File, self },
-  path::{ Path, PathBuf },
+  path::Path,
   io
 };
-
-use generic_array::GenericArray;
-use typenum::{ UInt, UTerm, B1, B0 };
 
 use sha3::{Digest, Sha3_256};
 
@@ -22,10 +23,10 @@ fn get_output_dir( input_dir: &str
                  , target: &str
                  ) -> anyhow::Result<String> {
   let directory = f.parent()
-                    .unwrap()
-                    .to_str()
-                    .unwrap_or("")
-                    .replace(input_dir, target);
+                   .context("no parent path")?
+                   .to_str()
+                   .unwrap_or("")
+                   .replace(input_dir, target);
   if directory != target && !Path::new(&directory).exists() {
     fs::create_dir_all(&directory)?;
   }
@@ -36,18 +37,16 @@ pub fn process_img( input_dir: &str
                   , f: &Path
                   , args: &Args
                   , target_dir: &Option<&str>
-                  , seen_hashes: &mut HashMap< GenericArray< u8
-                                                           , UInt<UInt<UInt<UInt<UInt<UInt<UTerm, B1>, B0>, B0>, B0>, B0>, B0> >
-                                             , PathBuf >
+                  , seen_hashes: &mut SHA256
                   ) -> anyhow::Result<()> {
- let fstem = f.file_stem().unwrap()
+ let fstem = f.file_stem().context("no file stem")?
                           .to_str()
-                          .unwrap();
+                          .context("file stem is not a string")?;
   if let Some(ignore_mask) = &args.ignore {
     if fstem.contains(ignore_mask) {
       if let Some(target) = target_dir {
-        let fname = f.file_name().unwrap()
-                     .to_str().unwrap();
+        let fname = f.file_name().context("no file name")?
+                     .to_str().context("file name is not a string")?;
         let directory = get_output_dir(input_dir, f, target)?;
         let mut new_path = format!("{directory}/{fname}");
         let mut i = 1;
