@@ -21,7 +21,7 @@ pub fn process_vid( input_dir: &str
   if let Some(target) = target_dir {
     let fname = f.file_name().context("no fname")?
                              .to_str()
-                             .unwrap_or_else(|| f.to_str().unwrap_or_else(|| "") );
+                             .unwrap_or_else(|| f.to_str().unwrap_or_default() );
     let directory = f.parent()
                      .context("no parent path")?
                      .to_str()
