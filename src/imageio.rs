@@ -69,13 +69,13 @@ pub async fn process_img( input_dir: &str
       new_path = format!("{directory}/{fstem}-{i}.jpg");
       i += 1;
     }
-    File::options().read(true).write(true).create_new(true).open(&new_path)?
+    File::options().write(true).create_new(true).open(&new_path)?
   } else {
     let new_path = format!("{fstem}-bunched.jpg");
     if Path::new(&new_path).exists() {
       async_fs::remove_file(&new_path).await?;
     }
-    File::options().read(true).write(true).create_new(true).open(&new_path)?
+    File::options().write(true).create_new(true).open(&new_path)?
   };
   for op in &args.additional {
     match op {
@@ -106,8 +106,9 @@ pub async fn process_img( input_dir: &str
   }
   img.write_to(&mut output, ImageFormat::Jpeg)?;
   if args.clean && !new_path.is_empty() {
+    let mut file = File::options().read(true).open(&new_path)?;
     let mut hasher = Sha3_256::new();
-    io::copy(&mut output, &mut hasher)?;
+    io::copy(&mut file, &mut hasher)?;
     let hash = hasher.finalize();
     match seen_hashes.entry(hash) {
       std::collections::hash_map::Entry::Vacant(map) => {
