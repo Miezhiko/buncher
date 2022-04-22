@@ -69,13 +69,13 @@ pub async fn process_img( input_dir: &str
       new_path = format!("{directory}/{fstem}-{i}.jpg");
       i += 1;
     }
-    File::create(&new_path)?
+    File::options().read(true).write(true).create_new(true).open(&new_path)?
   } else {
     let new_path = format!("{fstem}-bunched.jpg");
     if Path::new(&new_path).exists() {
       async_fs::remove_file(&new_path).await?;
     }
-    File::create(&new_path)?
+    File::options().read(true).write(true).create_new(true).open(&new_path)?
   };
   for op in &args.additional {
     match op {
