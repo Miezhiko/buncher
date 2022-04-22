@@ -20,7 +20,7 @@ pub enum Operation {
   Grayscale
 }
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, PartialEq)]
 pub enum Rotate {
   Rotate90,
   Rotate180,

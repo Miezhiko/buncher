@@ -13,9 +13,9 @@ use std::{
   }, fs, io, path::Path
 };
 
-use sha3::{Digest, Sha3_256};
+use sha3::{ Digest, Sha3_256 };
 
-pub fn process(args: &mut Args) -> anyhow::Result<()> {
+pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   let path = &args.directory;
   let mut seen_hashes = HashMap::new();
 
@@ -41,14 +41,14 @@ pub fn process(args: &mut Args) -> anyhow::Result<()> {
             },
             Entry::Occupied(_map) => {
               println!("removing duplication in target path {}", file_path.as_os_str().to_str().unwrap_or(""));
-              fs::remove_file(&file_path)?;
+              async_fs::remove_file(&file_path).await?;
               continue;
             }
           }
         }
       }
     } else {
-      fs::create_dir_all(&target_dir)?;
+      async_fs::create_dir_all(&target_dir).await?;
     }
     Some(target_dir.as_str())
   } else {
@@ -91,12 +91,12 @@ pub fn process(args: &mut Args) -> anyhow::Result<()> {
         },
         Entry::Occupied(_map) => {
           println!("removing as duplication {}", file_path.as_os_str().to_str().unwrap_or(""));
-          fs::remove_file(&file_path)?;
+          async_fs::remove_file(&file_path).await?;
           continue;
         }
       }
     }
-    process_img(path, file_path, args, &target_directory, &mut seen_hashes)?;
+    process_img(path, file_path, args, &target_directory, &mut seen_hashes).await?;
   }
 
   let walker_videos = globwalk::GlobWalkerBuilder::from_patterns(
@@ -120,12 +120,12 @@ pub fn process(args: &mut Args) -> anyhow::Result<()> {
         },
         Entry::Occupied(_map) => {
           println!("removing as duplication {}", file_path.as_os_str().to_str().unwrap_or(""));
-          fs::remove_file(&file_path)?;
+          async_fs::remove_file(&file_path).await?;
           continue;
         }
       }
     }
-    process_vid(path, file_path, args, &target_directory, &mut seen_hashes)?;
+    process_vid(path, file_path, args, &target_directory, &mut seen_hashes).await?;
   }
   Ok(())
 }

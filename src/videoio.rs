@@ -10,14 +10,14 @@ use std::{
 };
 
 use anyhow::Context;
-use sha3::{Digest, Sha3_256};
+use sha3::{ Digest, Sha3_256 };
 
-pub fn process_vid( input_dir: &str 
-                  , f: &Path
-                  , args: &Args
-                  , target_dir: &Option<&str>
-                  , seen_hashes: &mut SHA256
-                  ) -> anyhow::Result<()> {
+pub async fn process_vid( input_dir: &str 
+                        , f: &Path
+                        , args: &Args
+                        , target_dir: &Option<&str>
+                        , seen_hashes: &mut SHA256
+                        ) -> anyhow::Result<()> {
   if let Some(target) = target_dir {
     let fname = f.file_name().context("no fname")?
                              .to_str()
@@ -28,7 +28,7 @@ pub fn process_vid( input_dir: &str
                      .unwrap_or("")
                      .replace(input_dir, target);
     if &directory != target && !Path::new(&directory).exists() {
-      fs::create_dir_all(&directory)?;
+      async_fs::create_dir_all(&directory).await?;
     }
     let mut new_path = format!("{directory}/{fname}.mp4");
     let mut i = 1;
@@ -36,7 +36,7 @@ pub fn process_vid( input_dir: &str
       new_path = format!("{directory}/{fname}-{i}.mp4");
       i += 1;
     }
-    fs::copy(f, &new_path)?;
+    async_fs::copy(f, &new_path).await?;
 
     if args.clean {
       let mut file = fs::File::options().read(true).open(&new_path)?;
@@ -49,7 +49,7 @@ pub fn process_vid( input_dir: &str
         },
         Entry::Occupied(_map) => {
           println!("removing duplication in target path {}", &new_path);
-          fs::remove_file(&new_path)?;
+          async_fs::remove_file(&new_path).await?;
         }
       }
     }

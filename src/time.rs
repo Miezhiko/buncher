@@ -1,5 +1,5 @@
 use std::fmt;
-use std::time::{Duration, Instant};
+use std::time::{ Duration, Instant };
 
 pub struct Elapsed(Duration);
 

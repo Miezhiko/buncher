@@ -11,34 +11,34 @@ use image::{
 
 use std::{
   collections::hash_map::Entry,
-  fs::{ File, self },
+  fs::File,
   path::Path,
   io
 };
 
-use sha3::{Digest, Sha3_256};
+use sha3::{ Digest, Sha3_256 };
 
-fn get_output_dir( input_dir: &str
-                 , f: &Path
-                 , target: &str
-                 ) -> anyhow::Result<String> {
+async fn get_output_dir( input_dir: &str
+                       , f: &Path
+                       , target: &str
+                       ) -> anyhow::Result<String> {
   let directory = f.parent()
                    .context("no parent path")?
                    .to_str()
                    .unwrap_or("")
                    .replace(input_dir, target);
   if directory != target && !Path::new(&directory).exists() {
-    fs::create_dir_all(&directory)?;
+    async_fs::create_dir_all(&directory).await?;
   }
   Ok(directory)
 }
 
-pub fn process_img( input_dir: &str 
-                  , f: &Path
-                  , args: &Args
-                  , target_dir: &Option<&str>
-                  , seen_hashes: &mut SHA256
-                  ) -> anyhow::Result<()> {
+pub async fn process_img( input_dir: &str 
+                        , f: &Path
+                        , args: &Args
+                        , target_dir: &Option<&str>
+                        , seen_hashes: &mut SHA256
+                        ) -> anyhow::Result<()> {
  let fstem = f.file_stem().context("no file stem")?
                           .to_str()
                           .context("file stem is not a string")?;
@@ -47,14 +47,14 @@ pub fn process_img( input_dir: &str
       if let Some(target) = target_dir {
         let fname = f.file_name().context("no file name")?
                      .to_str().context("file name is not a string")?;
-        let directory = get_output_dir(input_dir, f, target)?;
+        let directory = get_output_dir(input_dir, f, target).await?;
         let mut new_path = format!("{directory}/{fname}");
         let mut i = 1;
         while Path::new(&new_path).exists() {
           new_path = format!("{directory}/{fname}-{i}.mp4");
           i += 1;
         }
-        fs::copy(f, new_path)?;
+        async_fs::copy(f, new_path).await?;
       }
       return Ok(());
     }
@@ -62,7 +62,7 @@ pub fn process_img( input_dir: &str
   let mut img = image::open(f)?;
   let mut new_path = String::new();
   let mut output = if let Some(target) = target_dir {
-    let directory = get_output_dir(input_dir, f, target)?;
+    let directory = get_output_dir(input_dir, f, target).await?;
     new_path = format!("{directory}/{fstem}.jpg");
     let mut i = 1;
     while Path::new(&new_path).exists() {
@@ -73,7 +73,7 @@ pub fn process_img( input_dir: &str
   } else {
     let new_path = format!("{fstem}-bunched.jpg");
     if Path::new(&new_path).exists() {
-      fs::remove_file(&new_path)?;
+      async_fs::remove_file(&new_path).await?;
     }
     File::create(&new_path)?
   };
@@ -106,9 +106,8 @@ pub fn process_img( input_dir: &str
   }
   img.write_to(&mut output, ImageFormat::Jpeg)?;
   if args.clean && !new_path.is_empty() {
-    let mut file = fs::File::options().read(true).open(&new_path)?;
     let mut hasher = Sha3_256::new();
-    io::copy(&mut file, &mut hasher)?;
+    io::copy(&mut output, &mut hasher)?;
     let hash = hasher.finalize();
     match seen_hashes.entry(hash) {
       std::collections::hash_map::Entry::Vacant(map) => {
@@ -116,7 +115,7 @@ pub fn process_img( input_dir: &str
       },
       Entry::Occupied(_map) => {
         println!("removing duplication in target path {}", &new_path);
-        fs::remove_file(&new_path)?;
+        async_fs::remove_file(&new_path).await?;
       }
     }
   }

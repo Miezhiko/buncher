@@ -12,11 +12,12 @@ use clap::Parser;
 
 use std::time::Instant;
 
-fn main() -> anyhow::Result<()> {
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
   let mut args  = Args::parse();
   let timer     = Instant::now();
 
-  buncher::process(&mut args)?;
+  buncher::process(&mut args).await?;
 
   println!("Elapsed {}", Elapsed::from(&timer));
   Ok(())

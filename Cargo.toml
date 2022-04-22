@@ -1,6 +1,6 @@
 [package]
 name            = "buncher"
-version         = "0.1.0"
+version         = "0.2.0"
 edition         = "2021"
 authors         = [ "Miezhiko" ]
 repository      = "https://github.com/Miezhiko/buncher"
@@ -15,3 +15,5 @@ globwalk        = "0.8"
 generic-array   = "0.14"
 typenum         = "1.15"
 sha3            = "0.10"
+tokio           = { version = "1.17", features = ["full"] }
+async-fs        = "1.5"

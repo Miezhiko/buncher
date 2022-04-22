@@ -5,17 +5,19 @@ use std::str::FromStr;
 use clap::Parser;
 
 impl FromStr for Size2D {
-  type Err = std::num::ParseIntError;
-
-  fn from_str(s: &str) -> Result<Self, Self::Err> {
+  type Err = anyhow::Error;
+  fn from_str(s: &str) -> anyhow::Result<Self> {
     let coords: Vec<&str> = s.trim_matches(|p| p == '(' || p == ')' )
                              .split(',')
                              .collect();
 
-    let x_fromstr = coords[0].trim().parse::<u32>()?;
-    let y_fromstr = coords[1].trim().parse::<u32>()?;
-
-    Ok(Size2D { width: x_fromstr, height: y_fromstr })
+    if coords.len() > 1 {
+      let x_fromstr = coords[0].trim().parse::<u32>()?;
+      let y_fromstr = coords[1].trim().parse::<u32>()?;
+      Ok(Size2D { width: x_fromstr, height: y_fromstr })
+    } else {
+      Err(anyhow::anyhow!("you must specify height and weight (h, v)"))
+    }
   }
 }
 
@@ -33,7 +35,6 @@ impl FromStr for Rotate {
 
 impl FromStr for Operation {
   type Err = anyhow::Error;
-
   fn from_str(s: &str) -> anyhow::Result<Self> {
     match s {
       "flip"      => Ok(Operation::Flip),
@@ -108,6 +109,20 @@ mod args_tests {
     assert_eq!(size3.width, 3);
     assert_eq!(size3.height, 7);
 
+    Ok(())
+  }
+
+  #[test]
+  fn rotate_parsing() -> anyhow::Result<()> {
+    let rotate1 = Rotate::from_str("180")?;
+    assert_eq!(rotate1, Rotate::Rotate180);
+    Ok(())
+  }
+
+  #[test]
+  fn operation_parsing() -> anyhow::Result<()> {
+    let operation1 = Operation::from_str("grayscale")?;
+    assert_eq!(operation1, Operation::Grayscale);
     Ok(())
   }
 }
