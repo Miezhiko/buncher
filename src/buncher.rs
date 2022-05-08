@@ -23,7 +23,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
     if Path::new(&target_dir).exists() {
       if args.clean {
         let walker = globwalk::GlobWalkerBuilder::from_patterns(
-            target_dir, &["*.{jpg, png, tiff, mp4}"]
+            target_dir, &["*.{jpg, png, tiff}"]
           ).max_depth(4)
            .follow_links(false)
            .build()?
@@ -109,22 +109,6 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   for entry in walker_videos {
     let file_path = entry.path();
     println!("processing: {}", file_path.display());
-    if args.clean {
-      let mut file = fs::File::options().read(true).open(&file_path)?;
-      let mut hasher = Sha3_256::new();
-      io::copy(&mut file, &mut hasher)?;
-      let hash = hasher.finalize();
-      match seen_hashes.entry(hash) {
-        Entry::Vacant(map) => {
-          map.insert(file_path.to_path_buf());
-        },
-        Entry::Occupied(_map) => {
-          println!("removing as duplication {}", file_path.as_os_str().to_str().unwrap_or(""));
-          async_fs::remove_file(&file_path).await?;
-          continue;
-        }
-      }
-    }
     process_vid(path, file_path, args, &target_directory, &mut seen_hashes).await?;
   }
   Ok(())
