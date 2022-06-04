@@ -1,6 +1,6 @@
 [package]
 name            = "buncher"
-version         = "0.2.2"
+version         = "0.2.3"
 edition         = "2021"
 authors         = [ "Miezhiko" ]
 repository      = "https://github.com/Miezhiko/buncher"
@@ -15,5 +15,5 @@ globwalk        = "0.8"
 generic-array   = "0.14"
 typenum         = "1.15"
 sha3            = "0.10"
-tokio           = { version = "1.18.1", features = ["rt-multi-thread", "time", "rt", "macros"] }
+tokio           = { version = "1.19.0", features = ["rt-multi-thread", "time", "rt", "macros"] }
 async-fs        = "1.5"
