@@ -109,7 +109,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   for entry in walker_videos {
     let file_path = entry.path();
     println!("processing: {}", file_path.display());
-    process_vid(path, file_path, args, &target_directory, &mut seen_hashes).await?;
+    process_vid(path, file_path, args, &target_directory).await?;
   }
   Ok(())
 }
