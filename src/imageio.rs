@@ -51,7 +51,7 @@ pub async fn process_img( input_dir: &str
         let mut new_path = format!("{directory}/{fname}");
         let mut i = 1;
         while Path::new(&new_path).exists() {
-          new_path = format!("{directory}/{fname}-{i}.mp4");
+          new_path = format!("{directory}/{fname}-{i}.jpg");
           i += 1;
         }
         async_fs::copy(f, new_path).await?;

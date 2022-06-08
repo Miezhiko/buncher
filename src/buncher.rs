@@ -70,6 +70,15 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
     args.additional.push(Operation::Invert);
   }
 
+  let nothing_todo =
+    target_directory.is_none()
+    && args.additional.is_empty()
+    && args.blur.is_none()
+    && args.brighten.is_none()
+    && args.resize.is_none()
+    && args.thumbnail.is_none()
+    && args.rotate.is_none();
+
   let walker_images = globwalk::GlobWalkerBuilder::from_patterns(
       path, &["*.{jpg, png, tiff}"]
     ).max_depth(4)
@@ -96,7 +105,9 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
         }
       }
     }
-    process_img(path, file_path, args, &target_directory, &mut seen_hashes).await?;
+    if !nothing_todo {
+      process_img(path, file_path, args, &target_directory, &mut seen_hashes).await?;
+    }
   }
 
   let walker_videos = globwalk::GlobWalkerBuilder::from_patterns(
@@ -108,8 +119,10 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
    .filter_map(Result::ok);
   for entry in walker_videos {
     let file_path = entry.path();
-    println!("processing: {}", file_path.display());
-    process_vid(path, file_path, args, &target_directory).await?;
+    if !nothing_todo || !args.separate_videos {
+      println!("processing: {}", file_path.display());
+      process_vid(path, file_path, args, &target_directory).await?;
+    }
   }
   Ok(())
 }

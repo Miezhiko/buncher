@@ -58,6 +58,9 @@ pub struct Args {
   #[clap(short, long, help="Remove duplicates")]
   pub clean: bool,
 
+  #[clap(short, long, help="Separate videos to different directory")]
+  pub separate_videos: bool,
+
   #[clap(long, help="Additional operations")]
   pub additional: Vec<Operation>,
 
