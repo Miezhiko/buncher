@@ -88,7 +88,6 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
      .filter_map(Result::ok);
   for entry in walker_images {
     let file_path = entry.path();
-    println!("processing: {}", file_path.display());
     if args.clean {
       let mut file = fs::File::options().read(true).open(&file_path)?;
       let mut hasher = Sha3_256::new();
@@ -106,6 +105,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
       }
     }
     if !nothing_todo {
+      println!("processing: {}", file_path.display());
       process_img(path, file_path, args, &target_directory, &mut seen_hashes).await?;
     }
   }
@@ -119,7 +119,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
    .filter_map(Result::ok);
   for entry in walker_videos {
     let file_path = entry.path();
-    if !nothing_todo || !args.separate_videos {
+    if !nothing_todo || args.separate_videos {
       println!("processing: {}", file_path.display());
       process_vid(path, file_path, args, &target_directory).await?;
     }

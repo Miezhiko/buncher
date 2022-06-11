@@ -1,4 +1,9 @@
-/target
+/target/
+/input/
+/output/
+/video/
 *.o
 *.hi
+*.zip
+*.7z
 hake

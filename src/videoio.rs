@@ -4,7 +4,7 @@ use std::path::Path;
 
 use anyhow::Context;
 
-const VIDEOS: &str = "video";
+const VIDEOS: &str = "../video";
 
 pub async fn process_vid( input_dir: &str 
                         , f: &Path
@@ -28,14 +28,21 @@ pub async fn process_vid( input_dir: &str
     if &directory != target && !Path::new(&directory).exists() {
       async_fs::create_dir_all(&directory).await?;
     }
-    let mut new_path = format!("{directory}/{fname}.mp4");
+    let mut new_path = format!("{directory}/{fname}");
     let mut i = 1;
     while Path::new(&new_path).exists() {
-      new_path = format!("{directory}/{fname}-{i}.mp4");
+      new_path = format!("{directory}/{fname}-{i}");
       i += 1;
     }
     async_fs::copy(f, &new_path).await?;
   } else if args.separate_videos {
+    let old_path = f.parent()
+                    .context("no parent path")?
+                    .to_str()
+                    .unwrap_or("");
+    if old_path.contains(VIDEOS) {
+      return Ok(());
+    }
     let fname = f.file_name().context("no fname")?
                  .to_str()
                  .unwrap_or_else(|| f.to_str().unwrap_or_default() );
@@ -43,7 +50,12 @@ pub async fn process_vid( input_dir: &str
     if !Path::new(&new_root).exists() {
       async_fs::create_dir_all(&new_root).await?;
     }
-    let new_path = format!("{new_root}/{fname}.mp4");
+    let mut new_path = format!("{new_root}/{fname}");
+    let mut i = 1;
+    while Path::new(&new_path).exists() {
+      new_path = format!("{new_root}/{fname}-{i}");
+      i += 1;
+    }
     async_fs::rename(f, &new_path).await?;
   }
   Ok(())
