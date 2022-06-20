@@ -76,6 +76,9 @@ pub struct Args {
   #[clap(long, help="Grayscale images")]
   pub grayscale: bool,
 
+  #[clap(long, help="Store as png instead of jpg")]
+  pub png: bool,
+
   #[clap(long, forbid_empty_values=true, help="Blur images")]
   pub blur: Option<f32>,
 

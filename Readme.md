@@ -4,10 +4,10 @@ images (and maybe videos) directory bunch processing app
 [![mawa](https://github.com/Miezhiko/buncher/actions/workflows/mawa.yml/badge.svg)](https://github.com/Miezhiko/buncher/actions/workflows/mawa.yml)
 
 ```bash
-buncher 0.1.0
+buncher 0.2.7
 
 USAGE:
-    buncher.exe [OPTIONS] --directory <DIRECTORY>
+    buncher [OPTIONS] --directory <DIRECTORY>
 
 OPTIONS:
         --additional <ADDITIONAL>    Additional operations
@@ -22,8 +22,10 @@ OPTIONS:
         --invert                     Invert images
         --mirror                     Mirror images
     -o, --output <OUTPUT>            Output directory
+        --png                        Store as png instead of jpg
         --resize <RESIZE>            Resize images
         --rotate <ROTATE>            Rotate images
+    -s, --separate-videos            Separate videos to different directory
         --thumbnail <THUMBNAIL>      Thumbnail images
     -V, --version                    Print version information
 ```

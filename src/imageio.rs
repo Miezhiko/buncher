@@ -42,6 +42,11 @@ pub async fn process_img( input_dir: &str
  let fstem = f.file_stem().context("no file stem")?
                           .to_str()
                           .context("file stem is not a string")?;
+  let extension: &str = if args.png {
+      "png"
+    } else {
+      "jpg"
+    };
   if let Some(ignore_mask) = &args.ignore {
     if fstem.contains(ignore_mask) {
       if let Some(target) = target_dir {
@@ -51,7 +56,7 @@ pub async fn process_img( input_dir: &str
         let mut new_path = format!("{directory}/{fname}");
         let mut i = 1;
         while Path::new(&new_path).exists() {
-          new_path = format!("{directory}/{fname}-{i}.jpg");
+          new_path = format!("{directory}/{fname}-{i}.{extension}");
           i += 1;
         }
         async_fs::copy(f, new_path).await?;
@@ -63,15 +68,15 @@ pub async fn process_img( input_dir: &str
   let mut new_path = String::new();
   let mut output = if let Some(target) = target_dir {
     let directory = get_output_dir(input_dir, f, target).await?;
-    new_path = format!("{directory}/{fstem}.jpg");
+    new_path = format!("{directory}/{fstem}.{extension}");
     let mut i = 1;
     while Path::new(&new_path).exists() {
-      new_path = format!("{directory}/{fstem}-{i}.jpg");
+      new_path = format!("{directory}/{fstem}-{i}.{extension}");
       i += 1;
     }
     File::options().write(true).create_new(true).open(&new_path)?
   } else {
-    let new_path = format!("{fstem}-bunched.jpg");
+    let new_path = format!("{fstem}-bunched.{extension}");
     if Path::new(&new_path).exists() {
       async_fs::remove_file(&new_path).await?;
     }
@@ -104,7 +109,11 @@ pub async fn process_img( input_dir: &str
       Rotate::Rotate270 => img.rotate270()
     }
   }
-  img.write_to(&mut output, ImageFormat::Jpeg)?;
+  if args.png {
+    img.write_to(&mut output, ImageFormat::Png)?;
+  } else {
+    img.write_to(&mut output, ImageFormat::Jpeg)?;
+  }
   if args.clean && !new_path.is_empty() {
     let mut file = File::options().read(true).open(&new_path)?;
     let mut hasher = Sha3_256::new();

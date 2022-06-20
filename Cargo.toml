@@ -1,6 +1,6 @@
 [package]
 name            = "buncher"
-version         = "0.2.6"
+version         = "0.2.7"
 edition         = "2021"
 authors         = [ "Miezhiko" ]
 repository      = "https://github.com/Miezhiko/buncher"
@@ -10,7 +10,7 @@ readme          = "Readme.md"
 [dependencies]
 image           = { version = "0.24.2", features = [ "png", "jpeg", "tiff" ] }
 anyhow          = "1"
-clap            = { version = "3.1", features = ["derive", "color"] }
+clap            = { version = "3.2", features = ["derive", "color"] }
 globwalk        = "0.8"
 generic-array   = "0.14"
 typenum         = "1.15"
