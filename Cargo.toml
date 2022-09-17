@@ -8,12 +8,12 @@ license         = "AGPL-3.0-only"
 readme          = "Readme.md"
 
 [dependencies]
-image           = { version = "0.24.2", features = [ "png", "jpeg", "tiff" ] }
+image           = { version = "0.24.3", features = [ "png", "jpeg", "tiff" ] }
 anyhow          = "1"
 clap            = { version = "3.2", features = ["derive", "color"] }
 globwalk        = "0.8"
 generic-array   = "0.14"
 typenum         = "1.15"
 sha3            = "0.10"
-tokio           = { version = "1.19.2", features = ["rt-multi-thread", "time", "rt", "macros"] }
-async-fs        = "1.5"
+tokio           = { version = "1.21.1", features = ["rt-multi-thread", "time", "rt", "macros"] }
+async-fs        = "1.6"
