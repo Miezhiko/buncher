@@ -31,7 +31,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
            .filter_map(Result::ok);
         for entry in walker {
           let file_path = entry.path();
-          let mut file = fs::File::options().read(true).open(&file_path)?;
+          let mut file = fs::File::options().read(true).open(file_path)?;
           let mut hasher = Sha3_256::new();
           io::copy(&mut file, &mut hasher)?;
           let hash = hasher.finalize();
@@ -89,7 +89,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   for entry in walker_images {
     let file_path = entry.path();
     if args.clean {
-      let mut file = fs::File::options().read(true).open(&file_path)?;
+      let mut file = fs::File::options().read(true).open(file_path)?;
       let mut hasher = Sha3_256::new();
       io::copy(&mut file, &mut hasher)?;
       let hash = hasher.finalize();
