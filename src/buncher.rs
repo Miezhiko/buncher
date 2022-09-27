@@ -96,7 +96,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
     && args.rotate.is_none();
 
   let walker = globwalk::GlobWalkerBuilder::from_patterns(
-      path, &["*.{jpg, png, tiff, mp4}"]
+      path, &["*.{jpg,png,tiff,mp4}"]
     ).max_depth(4)
      .follow_links(false)
      .build()?
