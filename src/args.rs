@@ -49,10 +49,10 @@ impl FromStr for Operation {
 #[derive(Parser, Debug)]
 #[clap(version, about, long_about = None)]
 pub struct Args {
-  #[clap(short, long, required=true, forbid_empty_values=true, help="Source directory")]
+  #[clap(short, long, required=true, help="Source directory")]
   pub directory: String,
 
-  #[clap(short, long, required=false, forbid_empty_values=true, help="Output directory")]
+  #[clap(short, long, required=false, help="Output directory")]
   pub output: Option<String>,
 
   #[clap(short, long, help="Remove duplicates")]
@@ -79,22 +79,22 @@ pub struct Args {
   #[clap(long, help="Store as png instead of jpg")]
   pub png: bool,
 
-  #[clap(long, forbid_empty_values=true, help="Blur images")]
+  #[clap(long, help="Blur images")]
   pub blur: Option<f32>,
 
-  #[clap(long, forbid_empty_values=true, help="Brighten images")]
+  #[clap(long, help="Brighten images")]
   pub brighten: Option<i32>,
 
-  #[clap(long, forbid_empty_values=true, help="Rotate images")]
+  #[clap(long, help="Rotate images")]
   pub rotate: Option<Rotate>,
 
-  #[clap(long, forbid_empty_values=true, help="Thumbnail images")]
+  #[clap(long, help="Thumbnail images")]
   pub thumbnail: Option<Size2D>,
 
-  #[clap(long, forbid_empty_values=true, help="Resize images")]
+  #[clap(long, help="Resize images")]
   pub resize: Option<Size2D>,
 
-  #[clap(short, long, required=false, forbid_empty_values=true, help="Ignore image by name mask")]
+  #[clap(short, long, required=false, help="Ignore image by name mask")]
   pub ignore: Option<String>
 }
 
