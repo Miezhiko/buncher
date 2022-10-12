@@ -24,7 +24,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
     if Path::new(&target_dir).exists() {
       if args.clean {
         let walker = globwalk::GlobWalkerBuilder::from_patterns(
-            target_dir, &["*.{jpg, png, tiff, mp4}"]
+            target_dir, &["*.{jpg,png,tiff,mp4}"]
           ).max_depth(4)
            .follow_links(false)
            .build()?
