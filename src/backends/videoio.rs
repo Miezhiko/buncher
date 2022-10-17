@@ -19,11 +19,13 @@ pub async fn process_vid( input_dir: &str
       if args.separate_videos {
         format!("{target}/{VIDEOS}")
       } else {
-        f.parent()
-         .context("no parent path")?
-         .to_str()
-         .unwrap_or("")
-         .replace(input_dir, target)
+        let new_target =
+          f.parent()
+          .context("no parent path")?
+          .to_str()
+          .unwrap_or("")
+          .replace(input_dir, target);
+        format!("{new_target}/vedeo")
       };
     if &directory != target && !Path::new(&directory).exists() {
       async_fs::create_dir_all(&directory).await?;
