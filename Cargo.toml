@@ -27,3 +27,9 @@ features = ["rt-multi-thread", "time", "rt", "macros"]
 git = "https://github.com/image-rs/image.git"
 branch = "master"
 features = [ "png", "jpeg", "tiff" ]
+
+[profile.release]
+opt-level = 3
+overflow-checks = false
+debug-assertions = false
+lto = "fat"
