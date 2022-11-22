@@ -25,7 +25,7 @@ pub async fn process_vid( input_dir: &str
           .to_str()
           .unwrap_or("")
           .replace(input_dir, target);
-        format!("{new_target}/vedeo")
+        format!("{new_target}/video")
       };
     if &directory != target && !Path::new(&directory).exists() {
       async_fs::create_dir_all(&directory).await?;
