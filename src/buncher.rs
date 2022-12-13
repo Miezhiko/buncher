@@ -10,7 +10,7 @@ use std::{
   collections::{
     hash_map::Entry,
     HashMap
-  }, fs, io, path::Path
+  }, fs, io, path::{ Path, PathBuf }
 };
 
 use sha3::{ Digest, Sha3_256 };
@@ -95,6 +95,10 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
     && args.thumbnail.is_none()
     && args.rotate.is_none();
 
+
+  let mut img_paths: Vec<PathBuf> = vec![];
+  let mut video_paths: Vec<PathBuf> = vec![];
+
   let walker = globwalk::GlobWalkerBuilder::from_patterns(
       path, &["*.{jpg,png,tiff,mp4}"]
     ).max_depth(4)
@@ -123,8 +127,8 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
           }
         }
         if !nothing_todo || args.separate_videos {
-          println!("processing: {}", file_path.display());
-          process_vid(path, file_path, args, &target_directory).await?;
+          println!("collecting: {}", file_path.display());
+          video_paths.push(file_path.to_path_buf());
         }
       } else {
         if args.clean {
@@ -144,10 +148,29 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
           }
         }
         if !nothing_todo {
-          println!("processing: {}", file_path.display());
-          process_img(path, file_path, args, &target_directory, &mut seen_hashes).await?;
+          println!("collecting: {}", file_path.display());
+          img_paths.push(file_path.to_path_buf());
         }
       }
+    }
+  }
+
+  println!("processing videos");
+  for file_path in video_paths.into_iter() {
+    println!("processing: {}", file_path.display());
+    process_vid(path, file_path, &args, &target_directory).await?;
+  }
+
+  println!("processing images");
+  for file_path in img_paths.into_iter() {
+    println!("processing: {}", file_path.display());
+    if let Err(why) = process_img( path
+                                  , file_path
+                                  , &args
+                                  , &target_directory
+                                  , &mut seen_hashes
+                                  ).await {
+      println!("Error: {}", why);
     }
   }
 

@@ -12,7 +12,7 @@ use image::{
 use std::{
   collections::hash_map::Entry,
   fs::File,
-  path::Path,
+  path::{ Path, PathBuf },
   io
 };
 
@@ -34,7 +34,7 @@ async fn get_output_dir( input_dir: &str
 }
 
 pub async fn process_img( input_dir: &str 
-                        , f: &Path
+                        , f: PathBuf
                         , args: &Args
                         , target_dir: &Option<&str>
                         , seen_hashes: &mut SHA256
@@ -52,22 +52,22 @@ pub async fn process_img( input_dir: &str
       if let Some(target) = target_dir {
         let fname = f.file_name().context("no file name")?
                      .to_str().context("file name is not a string")?;
-        let directory = get_output_dir(input_dir, f, target).await?;
+        let directory = get_output_dir(input_dir, &f, target).await?;
         let mut new_path = format!("{directory}/{fname}");
         let mut i = 1;
         while Path::new(&new_path).exists() {
           new_path = format!("{directory}/{fname}-{i}.{extension}");
           i += 1;
         }
-        async_fs::copy(f, new_path).await?;
+        async_fs::copy(&f, new_path).await?;
       }
       return Ok(());
     }
   }
-  let mut img = image::open(f)?;
+  let mut img = image::open(&f)?;
   let mut new_path = String::new();
   let mut output = if let Some(target) = target_dir {
-    let directory = get_output_dir(input_dir, f, target).await?;
+    let directory = get_output_dir(input_dir, &f, target).await?;
     new_path = format!("{directory}/{fstem}.{extension}");
     let mut i = 1;
     while Path::new(&new_path).exists() {

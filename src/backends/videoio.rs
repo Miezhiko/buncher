@@ -1,13 +1,13 @@
 use crate::args::*;
 
-use std::path::Path;
+use std::path::{ Path, PathBuf };
 
 use anyhow::Context;
 
 const VIDEOS: &str = "../video";
 
 pub async fn process_vid( input_dir: &str 
-                        , f: &Path
+                        , f: PathBuf
                         , args: &Args
                         , target_dir: &Option<&str>
                         ) -> anyhow::Result<()> {
