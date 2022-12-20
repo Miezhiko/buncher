@@ -15,6 +15,8 @@ use std::{
 
 use sha3::{ Digest, Sha3_256 };
 
+use pbr::ProgressBar;
+
 const EXTENSIONS: &str = "*.{jpg,jpeg,png,tiff,webp,mp4}";
 
 pub async fn process(args: &mut Args) -> anyhow::Result<()> {
@@ -172,6 +174,8 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   }
 
   println!("processing videos");
+  let mut pb_videos = ProgressBar::new(video_paths.len() as u64);
+  pb_videos.format("[=>_]");
   for file_path in video_paths.into_iter() {
     println!("processing: {}", file_path.display());
     if let Err(why) = process_vid( path
@@ -181,9 +185,13 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
                                  ).await {
       println!("Error processing video: {why}");
     }
+    pb_videos.inc();
   }
+  pb_videos.finish();
 
   println!("processing images");
+  let mut pb_images = ProgressBar::new(img_paths.len() as u64);
+  pb_images.format("[=>_]");
   for file_path in img_paths.into_iter() {
     println!("processing: {}", file_path.display());
     if let Err(why) = process_img( path
@@ -194,7 +202,9 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
                                  ).await {
       println!("Error processing image: {why}");
     }
+    pb_images.inc();
   }
+  pb_images.finish();
 
   Ok(())
 }
