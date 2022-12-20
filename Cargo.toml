@@ -1,6 +1,6 @@
 [package]
 name            = "buncher"
-version         = "0.3.2"
+version         = "0.3.3"
 edition         = "2021"
 authors         = [ "Miezhiko" ]
 repository      = "https://github.com/Miezhiko/buncher"
@@ -26,7 +26,7 @@ features = ["rt-multi-thread", "time", "rt", "macros"]
 [dependencies.image]
 git = "https://github.com/image-rs/image.git"
 branch = "master"
-features = [ "png", "jpeg", "tiff" ]
+features = [ "png", "jpeg", "tiff", "webp" ]
 
 [profile.release]
 opt-level = 3

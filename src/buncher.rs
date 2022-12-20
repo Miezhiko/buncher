@@ -15,6 +15,8 @@ use std::{
 
 use sha3::{ Digest, Sha3_256 };
 
+const EXTENSIONS: &str = "*.{jpg,jpeg,png,tiff,webp,mp4}";
+
 pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   let path = &args.directory;
   let mut seen_hashes = HashMap::new();
@@ -24,7 +26,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
     if Path::new(&target_dir).exists() {
       if args.clean {
         let walker = globwalk::GlobWalkerBuilder::from_patterns(
-            target_dir, &["*.{jpg,jpeg,png,tiff,mp4}"]
+            target_dir, &[EXTENSIONS]
           ).max_depth(4)
            .follow_links(false)
            .build()?
@@ -33,7 +35,8 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
         for entry in walker {
           let file_path = entry.path();
           if let Some(extension) = file_path.extension() {
-            let mut file = fs::File::options().read(true).open(file_path)?;
+            let mut file = fs::File::options().read(true)
+                                              .open(file_path)?;
             let mut hasher = Sha3_256::new();
             io::copy(&mut file, &mut hasher)?;
             let hash = hasher.finalize();
@@ -95,12 +98,11 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
     && args.thumbnail.is_none()
     && args.rotate.is_none();
 
-
-  let mut img_paths: Vec<PathBuf> = vec![];
+  let mut img_paths: Vec<PathBuf>   = vec![];
   let mut video_paths: Vec<PathBuf> = vec![];
 
   let walker = globwalk::GlobWalkerBuilder::from_patterns(
-      path, &["*.{jpg,jpeg,png,tiff,mp4}"]
+      path, &[EXTENSIONS]
     ).max_depth(4)
      .follow_links(false)
      .build()?
@@ -120,8 +122,15 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
               map.insert(file_path.to_path_buf());
             },
             Entry::Occupied(_map) => {
-              println!("removing as duplication video {}", file_path.as_os_str().to_str().unwrap_or(""));
-              async_fs::remove_file(&file_path).await?;
+              println!("removing as duplication video {}", file_path.as_os_str()
+                                                                    .to_str()
+                                                                    .unwrap_or(""));
+              let path_to_remove: PathBuf = file_path.to_path_buf();
+              tokio::spawn(async move {
+                if let Err(why) = async_fs::remove_file(path_to_remove).await {
+                  println!("Error removing file {why}");
+                }
+              });
               continue;
             }
           }
@@ -141,8 +150,15 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
               map.insert(file_path.to_path_buf());
             },
             Entry::Occupied(_map) => {
-              println!("removing as duplication image {}", file_path.as_os_str().to_str().unwrap_or(""));
-              async_fs::remove_file(&file_path).await?;
+              println!("removing as duplication image {}", file_path.as_os_str()
+                                                                    .to_str()
+                                                                    .unwrap_or(""));
+              let path_to_remove: PathBuf = file_path.to_path_buf();
+              tokio::spawn(async move {
+                if let Err(why) = async_fs::remove_file(path_to_remove).await {
+                  println!("Error removing file {why}");
+                }
+              });
               continue;
             }
           }
@@ -158,19 +174,25 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   println!("processing videos");
   for file_path in video_paths.into_iter() {
     println!("processing: {}", file_path.display());
-    process_vid(path, file_path, &args, &target_directory).await?;
+    if let Err(why) = process_vid( path
+                                 , file_path
+                                 , args
+                                 , &target_directory
+                                 ).await {
+      println!("Error processing video: {why}");
+    }
   }
 
   println!("processing images");
   for file_path in img_paths.into_iter() {
     println!("processing: {}", file_path.display());
     if let Err(why) = process_img( path
-                                  , file_path
-                                  , &args
-                                  , &target_directory
-                                  , &mut seen_hashes
-                                  ).await {
-      println!("Error: {}", why);
+                                 , file_path
+                                 , args
+                                 , &target_directory
+                                 , &mut seen_hashes
+                                 ).await {
+      println!("Error processing image: {why}");
     }
   }
 

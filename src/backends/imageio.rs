@@ -125,7 +125,11 @@ pub async fn process_img( input_dir: &str
       },
       Entry::Occupied(_map) => {
         println!("removing duplication in target path {}", &new_path);
-        async_fs::remove_file(&new_path).await?;
+        tokio::spawn(async move {
+          if let Err(why) = async_fs::remove_file(new_path).await {
+            println!("Error removing file {why}");
+          }
+        });
       }
     }
   }
