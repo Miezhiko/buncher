@@ -177,9 +177,9 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   let mut pb_videos = ProgressBar::new(video_paths.len() as u64);
   pb_videos.format("[=>_]");
   for file_path in video_paths.into_iter() {
-    pb_videos.message(
-      &format!("processing: {}", file_path.display())
-    );
+    //pb_videos.message(
+    //  &format!("processing: {}", file_path.display())
+    //);
     if let Err(why) = process_vid( path
                                  , file_path
                                  , args
@@ -195,9 +195,9 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   let mut pb_images = ProgressBar::new(img_paths.len() as u64);
   pb_images.format("[=>_]");
   for file_path in img_paths.into_iter() {
-    pb_videos.message(
-      &format!("processing: {}", file_path.display())
-    );
+    //pb_videos.message(
+    //  &format!("processing: {}", file_path.display())
+    //);
     if let Err(why) = process_img( path
                                  , file_path
                                  , args
