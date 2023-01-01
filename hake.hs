@@ -11,7 +11,8 @@ main = hake $ do
 
   "update | update dependencies" ∫ cargo ["update"]
 
-  buncherExecutable ♯
+  buncherExecutable ♯ do
+    git ["submodule", "update", "--init"]
     cargo <| "build" : buildFlags
 
   "install | install to system" ◉ [buncherExecutable] ∰
