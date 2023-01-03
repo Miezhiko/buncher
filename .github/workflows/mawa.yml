@@ -26,6 +26,9 @@ jobs:
         override: true
         components: clippy, rustfmt
 
+    - name: Install minizip
+      run: sudo apt-get install -y libminizip-dev
+
     - name: Build
       run: cargo build --verbose
       
