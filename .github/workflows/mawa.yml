@@ -18,7 +18,11 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+
     - name: Install Toolchain
       uses: actions-rs/toolchain@v1
       with:
