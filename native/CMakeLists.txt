@@ -6,7 +6,8 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Use submodule zlib/minizip on windows, and system lib on Linux
 IF (WIN32)
-  include_directories(zlib zlib/contrib ${CMAKE_CURRENT_BINARY_DIR})
+  include_directories(zlib ${CMAKE_CURRENT_BINARY_DIR})
+  include_directories(zlib/contrib ${CMAKE_CURRENT_BINARY_DIR})
 
   add_subdirectory(zlib)
 
