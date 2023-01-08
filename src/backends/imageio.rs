@@ -38,6 +38,7 @@ pub async fn process_img( input_dir: &str
                         , args: &Args
                         , target_dir: &Option<&str>
                         , seen_hashes: &mut SHA256
+                        , new_target: bool
                         ) -> anyhow::Result<()> {
  let fstem = f.file_stem().context("no file stem")?
                           .to_str()
@@ -114,7 +115,7 @@ pub async fn process_img( input_dir: &str
   } else {
     img.write_to(&mut output, ImageFormat::Jpeg)?;
   }
-  if args.clean && !new_path.is_empty() {
+  if !new_target && args.clean && !new_path.is_empty() {
     let mut file = File::options().read(true).open(&new_path)?;
     let mut hasher = Sha3_256::new();
     io::copy(&mut file, &mut hasher)?;

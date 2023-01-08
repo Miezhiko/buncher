@@ -24,7 +24,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   let mut seen_hashes = HashMap::new();
   let mut seen_hashes_videos = HashMap::new();
 
-  let target_directory = if let Some(target_dir) = &args.output {
+  let (target_directory, new_target) = if let Some(target_dir) = &args.output {
     if Path::new(&target_dir).exists() {
       if args.clean {
         let walker = globwalk::GlobWalkerBuilder::from_patterns(
@@ -32,7 +32,6 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
           ).max_depth(4)
            .follow_links(false)
            .build()?
-           .into_iter()
            .filter_map(Result::ok);
         for entry in walker {
           let file_path = entry.path();
@@ -68,12 +67,13 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
           }
         }
       }
+      ( Some(target_dir.as_str()), false )
     } else {
       async_fs::create_dir_all(&target_dir).await?;
+      ( Some(target_dir.as_str()), true )
     }
-    Some(target_dir.as_str())
   } else {
-    None
+    ( None, false )
   };
 
   args.additional.dedup();
@@ -103,12 +103,12 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   let mut img_paths: Vec<PathBuf>   = vec![];
   let mut video_paths: Vec<PathBuf> = vec![];
 
+  println!("collecting: file paths...");
   let walker = globwalk::GlobWalkerBuilder::from_patterns(
       path, &[EXTENSIONS]
     ).max_depth(4)
      .follow_links(false)
      .build()?
-     .into_iter()
      .filter_map(Result::ok);
   for entry in walker {
     let file_path = entry.path();
@@ -138,7 +138,6 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
           }
         }
         if !nothing_todo || args.separate_videos {
-          println!("collecting: {}", file_path.display());
           video_paths.push(file_path.to_path_buf());
         }
       } else {
@@ -166,7 +165,6 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
           }
         }
         if !nothing_todo {
-          println!("collecting: {}", file_path.display());
           img_paths.push(file_path.to_path_buf());
         }
       }
@@ -177,9 +175,6 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   let mut pb_videos = ProgressBar::new(video_paths.len() as u64);
   pb_videos.format("[=>_]");
   for file_path in video_paths.into_iter() {
-    //pb_videos.message(
-    //  &format!("processing: {}", file_path.display())
-    //);
     if let Err(why) = process_vid( path
                                  , file_path
                                  , args
@@ -195,14 +190,12 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   let mut pb_images = ProgressBar::new(img_paths.len() as u64);
   pb_images.format("[=>_]");
   for file_path in img_paths.into_iter() {
-    //pb_videos.message(
-    //  &format!("processing: {}", file_path.display())
-    //);
     if let Err(why) = process_img( path
                                  , file_path
                                  , args
                                  , &target_directory
                                  , &mut seen_hashes
+                                 , new_target
                                  ).await {
       println!("Error processing image: {why}");
     }
