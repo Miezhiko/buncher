@@ -3,8 +3,7 @@
   <br>
 </h1>
 
-images (and maybe videos) directory bunch processing
-====================================================
+<h3> images (and maybe videos) directory bunch processing </h3>
 
 <p align="center">
   <a href="#features">About</a>
@@ -51,9 +50,9 @@ buncher> cargo run --release -- --directory input --output output --grayscale --
      Running `target/release/buncher --directory input --output output --grayscale --clean --ignore my`
 ▪▪▪▪▪ Done, removed 67 duplicates
 processing videos
-  [00:00:00] [████████████████████████████████████████] (152/152, 100, ETA 0s)
+  [00:00:00] [████████████████████████████████████████] (152/152, 100%, ETA 0s)
 processing images
-⠒ [00:02:32] [██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] (182/2928, 6, ETA 41m)    
+⠒ [00:02:32] [██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] (182/2928, 6%, ETA 41m)    
 ```
 
 `RESIZE` example is `(64,64)`
@@ -62,8 +61,7 @@ possible `ROTATE` variants are `90`, `180`, `270`
 
 ## Notes
 
-Supported list of additional operations:
-----------------------------------------
+*Supported list of additional operations:*
 
  - flip
  - mirror

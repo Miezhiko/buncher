@@ -205,7 +205,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   let pb_videos = ProgressBar::new(video_paths.len() as u64);
   pb_videos.set_style(
     ProgressStyle::with_template(
-        "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] ({pos}/{len}, {percent}, ETA {eta})",
+        "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] ({pos}/{len}, {percent}%, ETA {eta})",
     )
     .unwrap());
   for file_path in video_paths.into_iter() {
@@ -224,7 +224,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   let pb_images = ProgressBar::new(img_paths.len() as u64);
   pb_images.set_style(
     ProgressStyle::with_template(
-        "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] ({pos}/{len}, {percent}, ETA {eta})",
+        "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] ({pos}/{len}, {percent}%, ETA {eta})",
     )
     .unwrap());
   for file_path in img_paths.into_iter() {
