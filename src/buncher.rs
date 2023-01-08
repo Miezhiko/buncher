@@ -123,6 +123,12 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   let mut video_paths: Vec<PathBuf> = vec![];
 
   pb.set_message("collecting: file paths...");
+  let mut duplicates_counter = if args.clean {
+    Some(0)
+  } else {
+    None
+  };
+
   let walker = globwalk::GlobWalkerBuilder::from_patterns(
       path, &[EXTENSIONS]
     ).max_depth(4)
@@ -143,9 +149,9 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
               map.insert(file_path.to_path_buf());
             },
             Entry::Occupied(_map) => {
-              println!("removing as duplication video {}", file_path.as_os_str()
-                                                                    .to_str()
-                                                                    .unwrap_or(""));
+              if let Some(counter) = &mut duplicates_counter {
+                *counter += 1;
+              }
               let path_to_remove: PathBuf = file_path.to_path_buf();
               tokio::spawn(async move {
                 if let Err(why) = async_fs::remove_file(path_to_remove).await {
@@ -170,9 +176,9 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
               map.insert(file_path.to_path_buf());
             },
             Entry::Occupied(_map) => {
-              println!("removing as duplication image {}", file_path.as_os_str()
-                                                                    .to_str()
-                                                                    .unwrap_or(""));
+              if let Some(counter) = &mut duplicates_counter {
+                *counter += 1;
+              }
               let path_to_remove: PathBuf = file_path.to_path_buf();
               tokio::spawn(async move {
                 if let Err(why) = async_fs::remove_file(path_to_remove).await {
@@ -189,13 +195,17 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
       }
     }
   }
-  pb.finish_with_message("Done");
+  if let Some(counter) = duplicates_counter {
+    pb.finish_with_message(format!("Done, removed {counter} duplicates"));
+  } else {
+    pb.finish_with_message("Done");
+  }
 
   println!("processing videos");
   let pb_videos = ProgressBar::new(video_paths.len() as u64);
   pb_videos.set_style(
     ProgressStyle::with_template(
-        "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] ({pos}/{len}, ETA {eta})",
+        "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] ({pos}/{len}, {percent}, ETA {eta})",
     )
     .unwrap());
   for file_path in video_paths.into_iter() {
@@ -214,7 +224,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   let pb_images = ProgressBar::new(img_paths.len() as u64);
   pb_images.set_style(
     ProgressStyle::with_template(
-        "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] ({pos}/{len}, ETA {eta})",
+        "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] ({pos}/{len}, {percent}, ETA {eta})",
     )
     .unwrap());
   for file_path in img_paths.into_iter() {

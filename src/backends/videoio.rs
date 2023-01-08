@@ -21,10 +21,10 @@ pub async fn process_vid( input_dir: &str
       } else {
         let new_target =
           f.parent()
-          .context("no parent path")?
-          .to_str()
-          .unwrap_or("")
-          .replace(input_dir, target);
+           .context("no parent path")?
+           .to_str()
+           .unwrap_or("")
+           .replace(input_dir, target);
         format!("{new_target}/video")
       };
     if &directory != target && !Path::new(&directory).exists() {

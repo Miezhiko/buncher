@@ -36,7 +36,7 @@ impl FromStr for Rotate {
 impl FromStr for Operation {
   type Err = anyhow::Error;
   fn from_str(s: &str) -> anyhow::Result<Self> {
-    match s {
+    match s.to_lowercase().as_str() {
       "flip"      => Ok(Operation::Flip),
       "mirror"    => Ok(Operation::Mirror),
       "invert"    => Ok(Operation::Invert),
