@@ -1,6 +1,6 @@
 [package]
 name            = "buncher"
-version         = "0.3.8"
+version         = "0.4.0"
 edition         = "2021"
 authors         = [ "Miezhiko" ]
 repository      = "https://github.com/Miezhiko/buncher"
@@ -16,6 +16,9 @@ sha3            = "0.10"
 async-fs        = "1.6"
 indicatif       = "0.17"
 
+[dependencies.libc]
+version = "0.2"
+
 [dependencies.clap]
 version = "4"
 features = ["derive", "color"]
@@ -28,6 +31,9 @@ features = ["rt-multi-thread", "time", "rt", "macros"]
 git = "https://github.com/image-rs/image.git"
 branch = "master"
 features = [ "png", "jpeg", "tiff", "webp" ]
+
+[build-dependencies.cmake]
+version = "0.1"
 
 [profile.release]
 opt-level = 3

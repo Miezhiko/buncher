@@ -2,7 +2,8 @@
 use crate::{
   types::*,
   args::*,
-  backends::{ imageio::process_img
+  backends::{ zip::extract
+            , imageio::process_img
             , videoio::process_vid }
 };
 
@@ -13,6 +14,8 @@ use std::{
     HashMap
   }, fs, io, path::{ Path, PathBuf }
 };
+
+use anyhow::Context;
 
 use sha3::{ Digest, Sha3_256 };
 
@@ -43,9 +46,11 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
       ])
   );
 
+  pb.set_message("preparing");
   let (target_directory, new_target) = if let Some(target_dir) = &args.output {
     if Path::new(&target_dir).exists() {
       if args.clean {
+        pb.set_message("cleaning target directory...");
         let walker = globwalk::GlobWalkerBuilder::from_patterns(
             target_dir, &[EXTENSIONS]
           ).max_depth(4)
@@ -118,6 +123,35 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
     && args.resize.is_none()
     && args.thumbnail.is_none()
     && args.rotate.is_none();
+
+  let zip_walker = globwalk::GlobWalkerBuilder::from_patterns(
+    path, &["*.{zip}"]
+  ).max_depth(4)
+    .follow_links(false)
+    .build()?
+    .filter_map(Result::ok);
+  for entry in zip_walker {
+    let file_path = entry.path();
+    let file_path_str = file_path.to_str()
+                                 .context("can't get file_path")?;
+    let file_stem = file_path.file_stem()
+                             .context("no file stem")?
+                             .to_str()
+                             .context("file stem is not a string")?;
+    let directory = file_path.parent()
+                             .context("no parent path")?
+                             .to_str()
+                             .unwrap_or("");
+    let new_filepath = format!("{directory}/{file_stem}");
+    pb.set_message(format!("unzipping {new_filepath}"));
+    extract(file_path_str, new_filepath.as_str());
+    let path_to_remove: PathBuf = file_path.to_path_buf();
+    tokio::spawn(async move {
+      if let Err(why) = async_fs::remove_file(path_to_remove).await {
+        println!("Error removing file {why}");
+      }
+    });
+  }
 
   let mut img_paths: Vec<PathBuf>   = vec![];
   let mut video_paths: Vec<PathBuf> = vec![];

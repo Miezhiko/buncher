@@ -3,7 +3,7 @@
   <br>
 </h1>
 
-<h3> images (and maybe videos) directory bunch processing </h3>
+<h3> images (and maybe videos) directory bunch processing, supporting zips </h3>
 
 <p align="center">
   <a href="#features">About</a>
