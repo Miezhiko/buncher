@@ -18,7 +18,6 @@ IF (WIN32)
           zlib/contrib/minizip/unzip.c
           zlib/contrib/minizip/zip.c)
 
-  target_include_directories(minizip zlib)
   target_link_libraries(minizip zlibstatic)
 ENDIF (WIN32)
 
