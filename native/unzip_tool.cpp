@@ -2,14 +2,21 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#ifdef _WIN32
 #include "dirent/include/dirent.h"
+#include <direct.h>
+#else
+#include <dirent.h>
+#endif
+
 #include "unzip_tool.h"
 
+#ifdef _WIN32
 #include "zlib/contrib/minizip/zip.h"
 #include "zlib/contrib/minizip/unzip.h"
-
-#ifdef _WIN32
-#include <direct.h>
+#else
+#include "minizip/zip.h"
+#include "minizip/unzip.h"
 #endif
 
 enum UnzipResult {
