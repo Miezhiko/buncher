@@ -1,3 +1,6 @@
 [submodule "native/zlib"]
 	path = native/zlib
 	url = https://github.com/madler/zlib.git
+[submodule "native/dirent"]
+	path = native/dirent
+	url = https://github.com/tronkko/dirent.git

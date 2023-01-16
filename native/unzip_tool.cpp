@@ -1,10 +1,16 @@
 #include <cstring>
 #include <sys/stat.h>
-#include <dirent.h>
 #include <sys/types.h>
+
+#include "dirent/include/dirent.h"
 #include "unzip_tool.h"
-#include "minizip/zip.h"
-#include "minizip/unzip.h"
+
+#include "zlib/contrib/minizip/zip.h"
+#include "zlib/contrib/minizip/unzip.h"
+
+#ifdef _WIN32
+#include <direct.h>
+#endif
 
 enum UnzipResult {
   UNZIP_OK,
@@ -136,7 +142,11 @@ int unzip(const char *zip_path, const char *target_path) {
 }
 
 int create_dir(const char *dir) {
+  #ifdef _WIN32
+  return _mkdir(dir);
+  #else
   return mkdir(dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+  #endif
 }
 
 int mkdirs(const char *dir) {

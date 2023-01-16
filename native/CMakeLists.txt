@@ -6,9 +6,11 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Use submodule zlib/minizip on windows, and system lib on Linux
 IF (WIN32)
-  include_directories(zlib/contrib ${CMAKE_CURRENT_BINARY_DIR})
+  include_directories(zlib/contrib zlib ${CMAKE_CURRENT_BINARY_DIR})
 
   add_subdirectory(zlib)
+
+  file(RENAME zlib/zconf.h.included zlib/zconf.h)
 
   add_library(minizip
           zlib/contrib/minizip/ioapi.c
@@ -22,4 +24,4 @@ IF (WIN32)
 ENDIF (WIN32)
 
 add_library(unzip_tool unzip_tool.cpp)
-target_link_libraries(unzip_tool minizip)
+target_link_libraries(unzip_tool minizip zlibstatic)
