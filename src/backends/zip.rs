@@ -8,9 +8,9 @@ extern {
 
 pub fn extract(zip_path: &str, target_path: &str) -> i32 {
   let src = CString::new(zip_path)
-    .expect(format!("CString::new(\"{}\") failed", zip_path).as_str());
+    .unwrap_or_else(|_| panic!("CString::new(\"{zip_path}\") failed"));
   let dst = CString::new(target_path)
-    .expect(format!("CString::new(\"{}\") failed", target_path).as_str());
+    .unwrap_or_else(|_| panic!("CString::new(\"{target_path}\") failed"));
   unsafe {
     unzip(src.as_ptr(), dst.as_ptr())
   }

@@ -46,6 +46,21 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
       ])
   );
 
+  args.additional.dedup();
+
+  if args.flip && !args.additional.contains(&Operation::Flip) {
+    args.additional.push(Operation::Flip);
+  }
+  if args.mirror && !args.additional.contains(&Operation::Mirror) {
+    args.additional.push(Operation::Mirror);
+  }
+  if args.grayscale && !args.additional.contains(&Operation::Grayscale) {
+    args.additional.push(Operation::Grayscale);
+  }
+  if args.invert && !args.additional.contains(&Operation::Invert) {
+    args.additional.push(Operation::Invert);
+  }
+
   pb.set_message("preparing");
   let (target_directory, new_target) = if let Some(target_dir) = &args.output {
     if Path::new(&target_dir).exists() {
@@ -100,21 +115,6 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
     ( None, false )
   };
 
-  args.additional.dedup();
-
-  if args.flip && !args.additional.contains(&Operation::Flip) {
-    args.additional.push(Operation::Flip);
-  }
-  if args.mirror && !args.additional.contains(&Operation::Mirror) {
-    args.additional.push(Operation::Mirror);
-  }
-  if args.grayscale && !args.additional.contains(&Operation::Grayscale) {
-    args.additional.push(Operation::Grayscale);
-  }
-  if args.invert && !args.additional.contains(&Operation::Invert) {
-    args.additional.push(Operation::Invert);
-  }
-
   let nothing_todo =
     target_directory.is_none()
     && args.additional.is_empty()
@@ -124,6 +124,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
     && args.thumbnail.is_none()
     && args.rotate.is_none();
 
+  pb.set_message("unpacking");
   let zip_walker = globwalk::GlobWalkerBuilder::from_patterns(
     path, &["*.{zip}"]
   ).max_depth(4)
