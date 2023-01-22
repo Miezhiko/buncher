@@ -60,15 +60,18 @@ int dump_entry(unzFile file, const char *filename, const char *target_path) {
       if (fwrite(buf, size, 1, fp) != 1) {
         printf("error: write to file %s failed\n", target_path);
         return_result = OTHER_ERROR;
+        goto dump_entry_exit;
       }
     } else if (size == 0) {
       break;
     } else {
       printf("error: read zip entry %s failed\n", filename);
       return_result = READ_ZIP_ENTRY_FAILED;
+      goto dump_entry_exit;
     }
   }
 
+  dump_entry_exit:
   if (fclose(fp) != 0) {
     printf("error: close file %s failed\n", target_path);
     return_result = OTHER_ERROR;
