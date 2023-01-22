@@ -40,6 +40,7 @@ const int BUFFER_SIZE = 8192;
 int mkdirs(const char *dir);
 
 int dump_entry(unzFile file, const char *filename, const char *target_path) {
+  int return_result = 0;
   int err = unzOpenCurrentFile(file);
   if (err != UNZ_OK) {
     printf("error: open zip entry %s failed\n", filename);
@@ -58,30 +59,31 @@ int dump_entry(unzFile file, const char *filename, const char *target_path) {
     if (size > 0) {
       if (fwrite(buf, size, 1, fp) != 1) {
         printf("error: write to file %s failed\n", target_path);
-        return OTHER_ERROR;
+        return_result = OTHER_ERROR;
       }
     } else if (size == 0) {
       break;
     } else {
       printf("error: read zip entry %s failed\n", filename);
-      return READ_ZIP_ENTRY_FAILED;
+      return_result = READ_ZIP_ENTRY_FAILED;
     }
   }
 
   if (fclose(fp) != 0) {
     printf("error: close file %s failed\n", target_path);
-    return OTHER_ERROR;
+    return_result = OTHER_ERROR;
   }
 
   if (unzCloseCurrentFile(file) != UNZ_OK) {
     printf("error: close zip entry %s failed\n", filename);
-    return CLOSE_ZIP_ENTRY_FAILED;
+    return_result = CLOSE_ZIP_ENTRY_FAILED;
   }
 
-  return 0;
+  return return_result;
 }
 
 int unzip(const char *zip_path, const char *target_path) {
+  int return_result = UNZIP_OK;
   unzFile file = unzOpen64(zip_path);
   if (file == NULL) {
     printf("error: open zip file %s failed\n", zip_path);
@@ -90,7 +92,8 @@ int unzip(const char *zip_path, const char *target_path) {
   unz_global_info64 global_info;
   int err = unzGetGlobalInfo64(file, &global_info);
   if (err != UNZ_OK) {
-    return GET_ZIP_INFO_FAILED;
+    return_result = GET_ZIP_INFO_FAILED;
+    goto unzip_exit;
   }
   char filename[MAX_FILENAME_LEN];
   char path_buf[MAX_FILENAME_LEN];
@@ -104,7 +107,8 @@ int unzip(const char *zip_path, const char *target_path) {
     unz_file_info64 file_info;
     err = unzGetCurrentFileInfo64(file, &file_info, filename, sizeof(filename), NULL, 0, NULL, 0);
     if (err != UNZ_OK) {
-      return GET_FILE_INFO_FAILED;
+      return_result = GET_FILE_INFO_FAILED;
+      goto unzip_exit;
     }
     int l = (int)strlen(filename);
     strncpy(path_buf + len, filename, l);
@@ -114,7 +118,8 @@ int unzip(const char *zip_path, const char *target_path) {
       err = mkdirs(path_buf);
       if (err != 0) {
         printf("error: create dir %s failed!!!\n", path_buf);
-        return err;
+        return_result = err;
+        goto unzip_exit;
       }
     } else {
       for (int i = len + l - 1; i > 0; --i) {
@@ -123,7 +128,8 @@ int unzip(const char *zip_path, const char *target_path) {
           err = mkdirs(path_buf);
           if (err != 0) {
             printf("error: create dir %s failed!!!\n", path_buf);
-            return err;
+            return_result = err;
+            goto unzip_exit;
           }
           path_buf[i] = '/';
           break;
@@ -131,7 +137,8 @@ int unzip(const char *zip_path, const char *target_path) {
       }
       err = dump_entry(file, filename, path_buf);
       if (err != 0) {
-        return err;
+        return_result = err;
+        goto unzip_exit;
       }
     }
 
@@ -139,13 +146,16 @@ int unzip(const char *zip_path, const char *target_path) {
     if (err == UNZ_END_OF_LIST_OF_FILE) {
       break;
     } else if (err != UNZ_OK) {
-      return GO_TO_NEXT_FILE_FAILED;
+      return_result = GO_TO_NEXT_FILE_FAILED;
+      goto unzip_exit;
     }
   }
+
+  unzip_exit:
   if (unzClose(file) != UNZ_OK) {
-    return CLOSE_ZIP_FILE_FAILED;
+    return_result = CLOSE_ZIP_FILE_FAILED;
   }
-  return UNZIP_OK;
+  return return_result;
 }
 
 int create_dir(const char *dir) {
