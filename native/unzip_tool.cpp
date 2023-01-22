@@ -89,6 +89,7 @@ int dump_entry(unzFile file, const char *filename, const char *target_path) {
 
 int unzip(const char *zip_path, const char *target_path) {
   int return_result = UNZIP_OK;
+  int len;
   unzFile file = unzOpen64(zip_path);
   if (file == NULL) {
     printf("error: open zip file %s failed\n", zip_path);
@@ -102,7 +103,7 @@ int unzip(const char *zip_path, const char *target_path) {
   }
   char filename[MAX_FILENAME_LEN];
   char path_buf[MAX_FILENAME_LEN];
-  int len = strlen(target_path);
+  len = strlen(target_path);
   strncpy(path_buf, target_path, len);
   if (path_buf[len-1] != '/') {
     path_buf[len++] = '/';
