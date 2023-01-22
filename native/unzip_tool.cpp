@@ -50,7 +50,8 @@ int dump_entry(unzFile file, const char *filename, const char *target_path) {
   FILE *fp = fopen(target_path, "w");
   if (fp == NULL) {
     printf("error: open file %s failed\n", target_path);
-    return OTHER_ERROR;
+    return_result = OTHER_ERROR;
+    goto dump_entry_exit_without_file_open;
   }
 
   char buf[BUFFER_SIZE];
@@ -77,6 +78,7 @@ int dump_entry(unzFile file, const char *filename, const char *target_path) {
     return_result = OTHER_ERROR;
   }
 
+  dump_entry_exit_without_file_open:
   if (unzCloseCurrentFile(file) != UNZ_OK) {
     printf("error: close zip entry %s failed\n", filename);
     return_result = CLOSE_ZIP_ENTRY_FAILED;
