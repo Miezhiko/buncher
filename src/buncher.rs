@@ -2,10 +2,12 @@
 use crate::{
   types::*,
   args::*,
-  backends::{ zip::extract
-            , imageio::process_img
+  backends::{ imageio::process_img
             , videoio::process_vid }
 };
+
+#[cfg(feature = "zip")]
+use crate::backends::zip::extract;
 
 use std::{
   time::Duration,
@@ -15,6 +17,7 @@ use std::{
   }, fs, io, path::{ Path, PathBuf }
 };
 
+#[cfg(feature = "zip")]
 use anyhow::Context;
 
 use sha3::{ Digest, Sha3_256 };
@@ -124,34 +127,37 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
     && args.thumbnail.is_none()
     && args.rotate.is_none();
 
-  pb.set_message("unpacking");
-  let zip_walker = globwalk::GlobWalkerBuilder::from_patterns(
-    path, &["*.{zip}"]
-  ).max_depth(4)
-    .follow_links(false)
-    .build()?
-    .filter_map(Result::ok);
-  for entry in zip_walker {
-    let file_path = entry.path();
-    let file_path_str = file_path.to_str()
-                                 .context("can't get file_path")?;
-    let file_stem = file_path.file_stem()
-                             .context("no file stem")?
-                             .to_str()
-                             .context("file stem is not a string")?;
-    let directory = file_path.parent()
-                             .context("no parent path")?
-                             .to_str()
-                             .unwrap_or("");
-    let new_filepath = format!("{directory}/{file_stem}");
-    pb.set_message(format!("unzipping {new_filepath}"));
-    extract(file_path_str, new_filepath.as_str());
-    let path_to_remove: PathBuf = file_path.to_path_buf();
-    tokio::spawn(async move {
-      if let Err(why) = async_fs::remove_file(path_to_remove).await {
-        println!("Error removing file {why}");
-      }
-    });
+  #[cfg(feature = "zip")]
+  {
+    pb.set_message("unpacking");
+    let zip_walker = globwalk::GlobWalkerBuilder::from_patterns(
+      path, &["*.{zip}"]
+    ).max_depth(4)
+      .follow_links(false)
+      .build()?
+      .filter_map(Result::ok);
+    for entry in zip_walker {
+      let file_path = entry.path();
+      let file_path_str = file_path.to_str()
+                                   .context("can't get file_path")?;
+      let file_stem = file_path.file_stem()
+                               .context("no file stem")?
+                               .to_str()
+                               .context("file stem is not a string")?;
+      let directory = file_path.parent()
+                               .context("no parent path")?
+                               .to_str()
+                               .unwrap_or("");
+      let new_filepath = format!("{directory}/{file_stem}");
+      pb.set_message(format!("unzipping {new_filepath}"));
+      extract(file_path_str, new_filepath.as_str());
+      let path_to_remove: PathBuf = file_path.to_path_buf();
+      tokio::spawn(async move {
+        if let Err(why) = async_fs::remove_file(path_to_remove).await {
+          println!("Error removing file {why}");
+        }
+      });
+    }
   }
 
   let mut img_paths: Vec<PathBuf>   = vec![];

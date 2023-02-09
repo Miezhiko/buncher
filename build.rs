@@ -1,6 +1,15 @@
+#[cfg(feature = "zip")]
 use std::path::PathBuf;
+
+#[cfg(feature = "zip")]
 use cmake::Config;
 
+#[cfg(not(feature = "zip"))]
+fn main() {
+  // nothing
+}
+
+#[cfg(feature = "zip")]
 fn main() {
   let profile = std::env::var("PROFILE").unwrap();
   let c_profile = match profile.as_str() {
