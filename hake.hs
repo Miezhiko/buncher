@@ -1,7 +1,7 @@
 {-# LANGUAGE MultiWayIf    #-}
 {-# LANGUAGE UnicodeSyntax #-}
 
-import Hake
+import           Hake
 
 main ∷ IO ()
 main = hake $ do
@@ -24,6 +24,9 @@ main = hake $ do
     rawSystem buncherExecutable ["--version"]
       >>= checkExitCode
 
+  "run | run buncher" ◉ [buncherExecutable] ∰
+    cargo . (("run" : buildFlags) ++) . ("--" :) =<< getHakeArgs
+
  where
   targetPath ∷ FilePath
   targetPath = "target"
@@ -32,10 +35,11 @@ main = hake $ do
   buildPath = targetPath </> "release"
 
   buildFlags ∷ [String]
-  buildFlags = [ "--release" ]
+  buildFlags = [ "--release"
+               , "--features", "zip" ]
 
   buncherExecutable ∷ FilePath
   buncherExecutable =
     {- HLINT ignore "Redundant multi-way if" -}
     if | os ∈ ["win32", "mingw32", "cygwin32"] → buildPath </> "buncher.exe"
-       | otherwise → buildPath </> "buncher"
+       | otherwise                             → buildPath </> "buncher"

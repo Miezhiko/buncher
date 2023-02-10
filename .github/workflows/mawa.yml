@@ -41,7 +41,7 @@ jobs:
       run: cargo test
 
     - name: Build all features
-      run: cargo build --verbose --features full
+      run: cargo build --verbose --features zip
 
     - name: Cargo clippy
       uses: actions-rs/cargo@v1
