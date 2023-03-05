@@ -29,7 +29,7 @@ version = "4"
 features = ["derive", "color"]
 
 [dependencies.tokio]
-version = "1.24.2"
+version = "1.26.0"
 features = ["rt-multi-thread", "time", "rt", "macros"]
 
 [dependencies.image]
