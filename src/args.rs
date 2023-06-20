@@ -46,7 +46,7 @@ impl FromStr for Operation {
   }
 }
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 #[clap(version, about, long_about = None)]
 pub struct Args {
   #[clap(short, long, required=true, help="Source directory")]
@@ -95,7 +95,10 @@ pub struct Args {
   pub resize: Option<Size2D>,
 
   #[clap(short, long, required=false, help="Ignore image by name mask")]
-  pub ignore: Option<String>
+  pub ignore: Option<String>,
+
+  #[clap(long, required=false, help="Single thread")]
+  pub one: bool
 }
 
 #[cfg(test)]

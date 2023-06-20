@@ -282,5 +282,9 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   }
   pb_images.finish();
 
+  if !args.one {
+    println!("please wait for all swapned threads to finish!");
+  }
+
   Ok(())
 }
