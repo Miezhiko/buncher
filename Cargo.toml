@@ -30,7 +30,7 @@ features = ["derive", "color"]
 
 [dependencies.tokio]
 version = "1.28.2"
-features = ["rt-multi-thread", "time", "rt", "macros"]
+features = ["rt-multi-thread", "time", "rt", "signal", "macros"]
 
 [dependencies.image]
 git = "https://github.com/image-rs/image.git"

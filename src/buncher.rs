@@ -283,7 +283,10 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   pb_images.finish();
 
   if !args.one {
-    println!("please wait for all swapned threads to finish!");
+    println!("this is stupid... but you have to Ctrl+C when it's done");
+    pb.set_message("please wait for all swapned threads to finish!");
+    tokio::signal::ctrl_c().await?;
+    pb.finish_with_message("OK");
   }
 
   Ok(())
