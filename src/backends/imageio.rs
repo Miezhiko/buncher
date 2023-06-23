@@ -14,12 +14,15 @@ use std::{
   collections::hash_map::Entry,
   fs::File,
   path::{ Path, PathBuf },
+  sync::Arc,
   io
 };
 
 use tokio::task::JoinHandle;
 
 use sha3::{ Digest, Sha3_256 };
+
+use indicatif::ProgressBar;
 
 async fn get_output_dir( input_dir: &str
                        , f: &Path
@@ -42,6 +45,7 @@ async fn process( input_dir: String
                 , target_dir: Option<String>
                 , fstem: String
                 , extension: String
+                , pb_images: Arc<ProgressBar>
                 ) -> anyhow::Result<()> {
   let mut img = image::open(&f)?;
   let mut output = if let Some(target) = target_dir {
@@ -92,6 +96,7 @@ async fn process( input_dir: String
   } else {
     img.write_to(&mut output, ImageFormat::Jpeg)?;
   }
+  pb_images.inc(1);
   Ok(())
 }
 
@@ -101,6 +106,7 @@ pub async fn process_img( input_dir: &str
                         , target_dir: &Option<&str>
                         , seen_hashes: &mut SHA256
                         , new_target: bool
+                        , pb_images: &Arc<ProgressBar>
                         ) -> anyhow::Result
                                 <Option
                                   <JoinHandle
@@ -210,6 +216,7 @@ pub async fn process_img( input_dir: &str
     }
     Ok(None)
   } else {
+    let pb_clone = Arc::clone(pb_images);
     Ok(Some(
       tokio::spawn(
         process( input_dir.to_string()
@@ -218,6 +225,7 @@ pub async fn process_img( input_dir: &str
               , t_dir
               , fstem.to_string()
               , extension.to_string()
+              , pb_clone
               )
     )))
   }

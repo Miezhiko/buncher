@@ -11,6 +11,7 @@ use crate::backends::zip::extract;
 
 use std::{
   time::Duration,
+  sync::Arc,
   collections::{
     hash_map::Entry,
     HashMap
@@ -264,7 +265,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   pb_videos.finish();
 
   println!("processing images");
-  let pb_images = ProgressBar::new(img_paths.len() as u64);
+  let pb_images = Arc::new(ProgressBar::new(img_paths.len() as u64));
   pb_images.set_style(
     ProgressStyle::with_template(
         "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] ({pos}/{len}, {percent}%, ETA {eta})",
@@ -279,24 +280,22 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
                      , &target_directory
                      , &mut seen_hashes
                      , new_target
+                     , &pb_images
                      ).await {
       Ok(Some(task)) => {
         image_processing_tasks.push(task);
       }, Ok(None) => {
-        // do nothing
+        pb_images.inc(1);
       }, Err(why) => {
         println!("Error processing image: {why}");
       }
     }
-    pb_images.inc(1);
   }
-  pb_images.finish();
 
   if !args.one {
-    pb.set_message("please wait for all threads to finish!");
     future::join_all(image_processing_tasks).await;
-    pb.finish_with_message("OK");
   }
+  pb_images.finish();
 
   Ok(())
 }
