@@ -4,6 +4,7 @@ use crate::{
 };
 
 use anyhow::Context;
+
 use image::{
   ImageFormat,
   imageops::FilterType
@@ -15,6 +16,8 @@ use std::{
   path::{ Path, PathBuf },
   io
 };
+
+use tokio::task::JoinHandle;
 
 use sha3::{ Digest, Sha3_256 };
 
@@ -98,7 +101,13 @@ pub async fn process_img( input_dir: &str
                         , target_dir: &Option<&str>
                         , seen_hashes: &mut SHA256
                         , new_target: bool
-                        ) -> anyhow::Result<()> {
+                        ) -> anyhow::Result
+                                <Option
+                                  <JoinHandle
+                                    <Result<(), anyhow::Error>>
+                                  >
+                                >
+                        {
  let fstem = f.file_stem().context("no file stem")?
               .to_str()
               .context("file stem is not a string")?;
@@ -121,7 +130,7 @@ pub async fn process_img( input_dir: &str
         }
         async_fs::copy(&f, new_path).await?;
       }
-      return Ok(());
+      return Ok(None);
     }
   }
   let t_dir = if let Some(target) = target_dir {
@@ -199,16 +208,17 @@ pub async fn process_img( input_dir: &str
         }
       }
     }
+    Ok(None)
   } else {
-    tokio::spawn(
-      process( input_dir.to_string()
-             , f.clone()
-             , args.clone()
-             , t_dir
-             , fstem.to_string()
-             , extension.to_string()
-             )
-    );
+    Ok(Some(
+      tokio::spawn(
+        process( input_dir.to_string()
+              , f.clone()
+              , args.clone()
+              , t_dir
+              , fstem.to_string()
+              , extension.to_string()
+              )
+    )))
   }
-  Ok(())
 }

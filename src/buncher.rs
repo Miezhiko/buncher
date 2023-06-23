@@ -24,6 +24,8 @@ use sha3::{ Digest, Sha3_256 };
 
 use indicatif::{ ProgressBar, ProgressStyle };
 
+use futures::future;
+
 const EXTENSIONS: &str = "*.{jpg,jpeg,png,tiff,webp,mp4}";
 
 pub async fn process(args: &mut Args) -> anyhow::Result<()> {
@@ -268,24 +270,31 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
         "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] ({pos}/{len}, {percent}%, ETA {eta})",
     )
     .unwrap());
+
+  let mut image_processing_tasks = vec![];
   for file_path in img_paths.into_iter() {
-    if let Err(why) = process_img( path
-                                 , file_path
-                                 , args
-                                 , &target_directory
-                                 , &mut seen_hashes
-                                 , new_target
-                                 ).await {
-      println!("Error processing image: {why}");
+    match process_img( path
+                     , file_path
+                     , args
+                     , &target_directory
+                     , &mut seen_hashes
+                     , new_target
+                     ).await {
+      Ok(Some(task)) => {
+        image_processing_tasks.push(task);
+      }, Ok(None) => {
+        // do nothing
+      }, Err(why) => {
+        println!("Error processing image: {why}");
+      }
     }
     pb_images.inc(1);
   }
   pb_images.finish();
 
   if !args.one {
-    println!("this is stupid... but you have to Ctrl+C when it's done");
-    pb.set_message("please wait for all swapned threads to finish!");
-    tokio::signal::ctrl_c().await?;
+    pb.set_message("please wait for all threads to finish!");
+    future::join_all(image_processing_tasks).await;
     pb.finish_with_message("OK");
   }
 
