@@ -139,11 +139,7 @@ pub async fn process_img( input_dir: &str
       return Ok(None);
     }
   }
-  let t_dir = if let Some(target) = target_dir {
-    Some(target.to_string())
-  } else {
-    None
-  };
+  let t_dir = target_dir.as_ref().map(|target| target.to_string());
   if args.one {
     let mut img = image::open(&f)?;
     let mut new_path = String::new();

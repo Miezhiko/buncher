@@ -1,6 +1,6 @@
 [package]
 name            = "buncher"
-version         = "0.5.2"
+version         = "0.5.3"
 edition         = "2021"
 authors         = [ "Miezhiko" ]
 repository      = "https://github.com/Miezhiko/buncher"
@@ -30,7 +30,7 @@ version = "4.3"
 features = ["derive", "color"]
 
 [dependencies.tokio]
-version = "1.28.2"
+version = "1.29.1"
 features = ["rt-multi-thread", "time", "rt", "signal", "macros"]
 
 [dependencies.image]
