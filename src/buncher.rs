@@ -3,7 +3,8 @@ use crate::{
   types::*,
   args::*,
   backends::{ imageio::process_img
-            , videoio::process_vid }
+            , videoio::process_vid
+            , library::generate_library }
 };
 
 #[cfg(feature = "zip")]
@@ -70,7 +71,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   pb.set_message("preparing");
   let (target_directory, new_target) = if let Some(target_dir) = &args.output {
     if Path::new(&target_dir).exists() {
-      if args.clean {
+      if args.clean || args.library {
         pb.set_message("cleaning target directory...");
         let walker = globwalk::GlobWalkerBuilder::from_patterns(
             target_dir, &[EXTENSIONS]
@@ -128,7 +129,8 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
     && args.brighten.is_none()
     && args.resize.is_none()
     && args.thumbnail.is_none()
-    && args.rotate.is_none();
+    && args.rotate.is_none()
+    && !args.library;
 
   #[cfg(feature = "zip")]
   {
@@ -167,7 +169,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   let mut video_paths: Vec<PathBuf> = vec![];
 
   pb.set_message("collecting: file paths...");
-  let mut duplicates_counter = if args.clean {
+  let mut duplicates_counter = if args.clean || args.library {
     Some(0)
   } else {
     None
@@ -183,7 +185,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
     let file_path = entry.path();
     if let Some(extension) = file_path.extension() {
       if extension == "mp4" {
-        if args.clean {
+        if args.clean || args.library {
           let mut file = fs::File::options().read(true).open(file_path)?;
           let mut hasher = Sha3_256::new();
           io::copy(&mut file, &mut hasher)?;
@@ -210,7 +212,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
           video_paths.push(file_path.to_path_buf());
         }
       } else {
-        if args.clean {
+        if args.clean || args.library {
           let mut file = fs::File::options().read(true).open(file_path)?;
           let mut hasher = Sha3_256::new();
           io::copy(&mut file, &mut hasher)?;
@@ -243,6 +245,13 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
     pb.finish_with_message(format!("Done, removed {counter} duplicates"));
   } else {
     pb.finish_with_message("Done");
+  }
+
+  if args.library {
+    generate_library( path
+                    , video_paths
+                    , img_paths ).await?;
+    return Ok(());
   }
 
   println!("processing videos");

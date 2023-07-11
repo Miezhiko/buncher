@@ -18,7 +18,7 @@
 ## About
 
 ```bash
-Usage:
+Usage: buncher [OPTIONS] --directory <DIRECTORY>
 
 Options:
   -d, --directory <DIRECTORY>    Source directory
@@ -37,8 +37,10 @@ Options:
       --thumbnail <THUMBNAIL>    Thumbnail images
       --resize <RESIZE>          Resize images
   -i, --ignore <IGNORE>          Ignore image by name mask
-  -h, --help                     Print help information
-  -V, --version                  Print version information
+      --one                      Single thread
+      --library                  Restructure local library
+  -h, --help                     Print help
+  -V, --version                  Print version
 ```
 
 for example:

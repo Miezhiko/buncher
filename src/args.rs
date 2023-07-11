@@ -98,7 +98,10 @@ pub struct Args {
   pub ignore: Option<String>,
 
   #[clap(long, required=false, help="Single thread")]
-  pub one: bool
+  pub one: bool,
+
+  #[clap(long, required=false, help="Restructure local library")]
+  pub library: bool
 }
 
 #[cfg(test)]
