@@ -48,6 +48,7 @@ async fn process( input_dir: String
                 , pb_images: Arc<ProgressBar>
                 ) -> anyhow::Result<()> {
   let mut img = image::open(&f)?;
+
   let mut output = if let Some(target) = target_dir {
     let directory = get_output_dir(&input_dir, &f, &target).await?;
     let mut new_path = format!("{directory}/{fstem}.{extension}");
@@ -64,6 +65,7 @@ async fn process( input_dir: String
     }
     File::options().write(true).create_new(true).open(&new_path)?
   };
+
   for op in &args.additional {
     match op {
       Operation::Flip       => img = img.flipv(),
@@ -72,6 +74,7 @@ async fn process( input_dir: String
       Operation::Grayscale  => img = img.grayscale()
     };
   }
+
   if let Some(blur) = args.blur {
     img = img.blur(blur);
   }
