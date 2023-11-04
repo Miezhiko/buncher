@@ -69,7 +69,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   }
 
   pb.set_message("preparing");
-  let (target_directory, new_target) = if let Some(target_dir) = &args.output {
+  let target_directory = if let Some(target_dir) = &args.output {
     if Path::new(&target_dir).exists() {
       if args.clean || args.library {
         pb.set_message("cleaning target directory...");
@@ -113,13 +113,13 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
           }
         }
       }
-      ( Some(target_dir.as_str()), false )
+      Some(target_dir.as_str())
     } else {
       async_fs::create_dir_all(&target_dir).await?;
-      ( Some(target_dir.as_str()), true )
+      Some(target_dir.as_str())
     }
   } else {
-    ( None, false )
+    None
   };
 
   let nothing_todo =
@@ -287,8 +287,6 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
                      , file_path
                      , args
                      , &target_directory
-                     , &mut seen_hashes
-                     , new_target
                      , &pb_images
                      ).await {
       Ok(Some(task)) => {
@@ -301,9 +299,8 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
     }
   }
 
-  if !args.one {
-    future::join_all(image_processing_tasks).await;
-  }
+  future::join_all(image_processing_tasks).await;
+
   pb_images.finish();
 
   Ok(())

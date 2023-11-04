@@ -1,6 +1,6 @@
 [package]
 name            = "buncher"
-version         = "0.5.5"
+version         = "0.6.0"
 edition         = "2021"
 authors         = [ "Miezhiko" ]
 repository      = "https://github.com/Miezhiko/buncher"
@@ -14,13 +14,12 @@ zip = ["libc", "cmake"]
 [dependencies]
 anyhow          = "1.0"
 globwalk        = "0.8"
-generic-array   = "0.14.7"
-typenum         = "1.16"
+typenum         = "1.17"
 sha3            = "0.10.8"
 async-fs        = "2.0"
 indicatif       = "0.17"
 futures         = "0.3"
-futures-lite    = "1.13"
+futures-lite    = "2.0"
 
 [dependencies.libc]
 version = "0.2"

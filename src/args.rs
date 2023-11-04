@@ -97,9 +97,6 @@ pub struct Args {
   #[clap(short, long, required=false, help="Ignore image by name mask")]
   pub ignore: Option<String>,
 
-  #[clap(long, required=false, help="Single thread")]
-  pub one: bool,
-
   #[clap(long, required=false, help="Restructure local library")]
   pub library: bool
 }

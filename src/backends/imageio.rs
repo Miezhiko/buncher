@@ -11,16 +11,12 @@ use image::{
 };
 
 use std::{
-  collections::hash_map::Entry,
   fs::File,
   path::{ Path, PathBuf },
   sync::Arc,
-  io
 };
 
 use tokio::task::JoinHandle;
-
-use sha3::{ Digest, Sha3_256 };
 
 use indicatif::ProgressBar;
 
@@ -107,8 +103,6 @@ pub async fn process_img( input_dir: &str
                         , f: PathBuf
                         , args: &Args
                         , target_dir: &Option<&str>
-                        , seen_hashes: &mut SHA256
-                        , new_target: bool
                         , pb_images: &Arc<ProgressBar>
                         ) -> anyhow::Result
                                 <Option
@@ -143,89 +137,16 @@ pub async fn process_img( input_dir: &str
     }
   }
   let t_dir = target_dir.as_ref().map(|target| target.to_string());
-  if args.one {
-    let mut img = image::open(&f)?;
-    let mut new_path = String::new();
-    let mut output = if let Some(target) = target_dir {
-      let directory = get_output_dir(input_dir, &f, target).await?;
-      new_path = format!("{directory}/{fstem}.{extension}");
-      let mut i = 1;
-      while Path::new(&new_path).exists() {
-        new_path = format!("{directory}/{fstem}-{i}.{extension}");
-        i += 1;
-      }
-      File::options().write(true).create_new(true).open(&new_path)?
-    } else {
-      let new_path = format!("{fstem}-bunched.{extension}");
-      if Path::new(&new_path).exists() {
-        async_fs::remove_file(&new_path).await?;
-      }
-      File::options().write(true).create_new(true).open(&new_path)?
-    };
-    for op in &args.additional {
-      match op {
-        Operation::Flip       => img = img.flipv(),
-        Operation::Mirror     => img = img.fliph(),
-        Operation::Invert     => img.invert(),
-        Operation::Grayscale  => img = img.grayscale()
-      };
-    }
-    if let Some(blur) = args.blur {
-      img = img.blur(blur);
-    }
-    if let Some(brighten) = args.brighten {
-      img = img.brighten(brighten);
-    }
-    if let Some(resize) = &args.resize {
-      img = img.resize(resize.width, resize.height, FilterType::Nearest);
-    }
-    if let Some(thumbnail) = &args.thumbnail {
-      img = img.thumbnail(thumbnail.width, thumbnail.height);
-    }
-    if let Some(rotate) = &args.rotate {
-      img = match rotate {
-        Rotate::Rotate90  => img.rotate90(),
-        Rotate::Rotate180 => img.rotate180(),
-        Rotate::Rotate270 => img.rotate270()
-      }
-    }
-    if args.png {
-      img.write_to(&mut output, ImageFormat::Png)?;
-    } else {
-      img.write_to(&mut output, ImageFormat::Jpeg)?;
-    }
-    if !new_target && args.clean && !new_path.is_empty() {
-      let mut file = File::options().read(true).open(&new_path)?;
-      let mut hasher = Sha3_256::new();
-      io::copy(&mut file, &mut hasher)?;
-      let hash = hasher.finalize();
-      match seen_hashes.entry(hash) {
-        std::collections::hash_map::Entry::Vacant(map) => {
-          map.insert(Path::new(&new_path).to_path_buf());
-        },
-        Entry::Occupied(_map) => {
-          println!("removing duplication in target path {}", &new_path);
-          tokio::spawn(async move {
-            if let Err(why) = async_fs::remove_file(new_path).await {
-              println!("Error removing file {why}");
-            }
-          });
-        }
-      }
-    }
-    Ok(None)
-  } else {
-    let pb_clone = Arc::clone(pb_images);
-    Ok(Some(
-      tokio::spawn(
-        process( input_dir.to_string()
-              , f.clone()
-              , args.clone()
-              , t_dir
-              , fstem.to_string()
-              , extension.to_string()
-              , pb_clone
-              )
-    )))
-  }
+  let pb_clone = Arc::clone(pb_images);
+  Ok(Some(
+    tokio::spawn(
+      process( input_dir.to_string()
+            , f.clone()
+            , args.clone()
+            , t_dir
+            , fstem.to_string()
+            , extension.to_string()
+            , pb_clone
+            )
+  )))
 }

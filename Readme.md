@@ -37,7 +37,6 @@ Options:
       --thumbnail <THUMBNAIL>    Thumbnail images
       --resize <RESIZE>          Resize images
   -i, --ignore <IGNORE>          Ignore image by name mask
-      --one                      Single thread
       --library                  Restructure local library
   -h, --help                     Print help
   -V, --version                  Print version

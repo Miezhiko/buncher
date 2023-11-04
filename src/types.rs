@@ -1,16 +1,4 @@
-use std::{
-  collections::HashMap,
-  path::PathBuf
-};
-
-use generic_array::GenericArray;
-use typenum::{ UInt, UTerm, B1, B0 };
-
 use clap::Parser;
-
-pub type SHA256 = HashMap< GenericArray< u8
-                         , UInt<UInt<UInt<UInt<UInt<UInt<UTerm, B1>, B0>, B0>, B0>, B0>, B0> >
-                         , PathBuf >;
 
 #[derive(Parser, Debug, PartialEq, Eq, Clone)]
 pub enum Operation {
