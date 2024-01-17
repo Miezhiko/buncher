@@ -18,7 +18,7 @@
 ## About
 
 ```bash
-Usage: buncher [OPTIONS] --directory <DIRECTORY>
+Usage: buncher.exe [OPTIONS] --directory <DIRECTORY>
 
 Options:
   -d, --directory <DIRECTORY>    Source directory
@@ -33,6 +33,7 @@ Options:
       --png                      Store as png instead of jpg
       --blur <BLUR>              Blur images
       --brighten <BRIGHTEN>      Brighten images
+      --hue <HUE>                Tune huerotate of images
       --rotate <ROTATE>          Rotate images
       --thumbnail <THUMBNAIL>    Thumbnail images
       --resize <RESIZE>          Resize images
@@ -59,15 +60,3 @@ processing images
 `RESIZE` example is `(64,64)`
 
 possible `ROTATE` variants are `90`, `180`, `270`
-
-## Notes
-
-*Supported list of additional operations:*
-
- - flip
- - mirror
- - invert
- - grayscale
- - ...
-
-**this is very early version**

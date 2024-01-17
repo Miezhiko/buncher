@@ -32,8 +32,8 @@ const EXTENSIONS: &str = "*.{jpg,jpeg,png,tiff,webp,mp4}";
 
 pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   let path = &args.directory;
-  let mut seen_hashes = HashMap::new();
-  let mut seen_hashes_videos = HashMap::new();
+  let mut seen_hashes         = HashMap::new();
+  let mut seen_hashes_videos  = HashMap::new();
 
   let pb = ProgressBar::new_spinner();
   pb.enable_steady_tick(Duration::from_millis(120));
@@ -49,7 +49,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
         "▹▹▸▹▹",
         "▹▹▹▸▹",
         "▹▹▹▹▸",
-        "▪▪▪▪▪",
+        "▪▪▪▪▪"
       ])
   );
 
@@ -123,13 +123,14 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
   };
 
   let nothing_todo =
-    target_directory.is_none()
+    target_directory  .is_none()
+    && args.blur      .is_none()
+    && args.brighten  .is_none()
+    && args.hue       .is_none()
+    && args.resize    .is_none()
+    && args.thumbnail .is_none()
+    && args.rotate    .is_none()
     && args.additional.is_empty()
-    && args.blur.is_none()
-    && args.brighten.is_none()
-    && args.resize.is_none()
-    && args.thumbnail.is_none()
-    && args.rotate.is_none()
     && !args.library;
 
   #[cfg(feature = "zip")]
@@ -241,6 +242,7 @@ pub async fn process(args: &mut Args) -> anyhow::Result<()> {
       }
     }
   }
+
   if let Some(counter) = duplicates_counter {
     pb.finish_with_message(format!("Done, removed {counter} duplicates"));
   } else {

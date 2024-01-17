@@ -85,6 +85,9 @@ pub struct Args {
   #[clap(long, help="Brighten images")]
   pub brighten: Option<i32>,
 
+  #[clap(long, help="Tune huerotate of images")]
+  pub hue: Option<i32>,
+
   #[clap(long, help="Rotate images")]
   pub rotate: Option<Rotate>,
 

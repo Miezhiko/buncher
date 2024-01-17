@@ -77,6 +77,9 @@ async fn process( input_dir: String
   if let Some(brighten) = args.brighten {
     img = img.brighten(brighten);
   }
+  if let Some(hue) = args.hue {
+    img = img.huerotate(hue);
+  }
   if let Some(resize) = &args.resize {
     img = img.resize(resize.width, resize.height, FilterType::Nearest);
   }
